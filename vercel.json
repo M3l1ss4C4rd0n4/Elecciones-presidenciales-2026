@@ -1,0 +1,8 @@
+{
+  "buildCommand": null,
+  "outputDirectory": "outputs",
+  "devCommand": null,
+  "rewrites": [
+    { "source": "/", "destination": "/dashboard.html" }
+  ]
+}
