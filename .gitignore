@@ -1,0 +1,7 @@
+data/raw/
+notebooks/
+*.pyc
+__pycache__/
+.venv/
+venv/
+temp_cand.csv

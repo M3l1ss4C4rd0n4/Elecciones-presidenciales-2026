@@ -1,0 +1,515 @@
+"""
+Mapa interactivo:
+  - Modo GANADOR (default): cada UPZ del color del candidato que la gano
+  - Modos: relativo / absoluto / % UPZ / diferencia
+  - Multi-select de candidatos (checkboxes)
+  - Tooltip + popup completo
+"""
+
+import pandas as pd
+import geopandas as gpd
+import numpy as np
+import os, json
+
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROC = os.path.join(BASE, 'data', 'processed')
+OUT = os.path.join(BASE, 'outputs')
+os.makedirs(OUT, exist_ok=True)
+
+def fix_name(n):
+    raw = n.encode('utf-8')
+    fixes = {
+        b'IV\xc3\x83\xc2\x81N CEPEDA CASTRO': 'IV\u00c1N CEPEDA CASTRO',
+        b'CLAUDIA L\xc3\x83\xe2\x80\x9cPEZ': 'CLAUDIA L\u00d3PEZ',
+        b'RA\xc3\x83\xc5\xa1L SANTIAGO BOTERO JARAMILLO': 'RA\u00daL SANTIAGO BOTERO JARAMILLO',
+        b'\xc3\x83\xe2\x80\x9cSCAR MAURICIO LIZCANO ARANGO': '\u00d3SCAR MAURICIO LIZCANO ARANGO',
+        b'MIGUEL URIBE LONDO\xc3\x83\xe2\x80\x98O': 'MIGUEL URIBE LONDO\u00d1O',
+    }
+    return fixes.get(raw, n)
+
+# ─── DATOS ───
+votos = pd.read_csv(os.path.join(PROC, 'votos_por_upz.csv'))
+votos['CANNOMBRE'] = votos['CANNOMBRE'].apply(fix_name)
+upz_geo = gpd.read_file(os.path.join(PROC, 'upz_con_votos.geojson'))
+
+cand_order = (
+    votos.groupby('CANNOMBRE')['VOTOS'].sum()
+    .sort_values(ascending=False).index.tolist()
+)
+
+# ─── PIVOT ───
+pivot = votos.pivot_table(index='UPLCODIGO', columns='CANNOMBRE', values='VOTOS', aggfunc='sum').fillna(0).reset_index()
+upz_geo_4326 = upz_geo.to_crs('EPSG:4326')
+upz_geo_4326 = upz_geo_4326.merge(pivot, on='UPLCODIGO', how='left')
+for col in cand_order:
+    upz_geo_4326[col] = upz_geo_4326[col].fillna(0).astype(float)
+
+total_col = 'TOTAL_VOTOS'
+if total_col not in upz_geo_4326.columns:
+    upz_geo_4326[total_col] = upz_geo_4326[cand_order].sum(axis=1)
+
+# ─── PCT + DIFF ───
+for cand in cand_order:
+    upz_geo_4326[f'pct_{cand}'] = np.where(
+        upz_geo_4326[total_col] > 0,
+        (upz_geo_4326[cand] / upz_geo_4326[total_col] * 100).round(2), 0,
+    )
+    mean_val = upz_geo_4326[cand].mean()
+    upz_geo_4326[f'diff_{cand}'] = (upz_geo_4326[cand] - mean_val).round(0)
+
+# ─── GANADOR por UPZ ───
+upz_geo_4326['GANADOR_IDX'] = upz_geo_4326[cand_order].idxmax(axis=1)
+upz_geo_4326['GANADOR'] = upz_geo_4326['GANADOR_IDX']
+vote_cols_arr = np.array([upz_geo_4326[c].values for c in cand_order])
+sorted_votes = np.sort(vote_cols_arr, axis=0)
+upz_geo_4326['MARGEN_VOTOS'] = sorted_votes[-1] - sorted_votes[-2]
+upz_geo_4326['MARGEN_PCT'] = np.where(
+    upz_geo_4326[total_col] > 0,
+    (upz_geo_4326['MARGEN_VOTOS'] / upz_geo_4326[total_col] * 100).round(1), 0,
+)
+
+# ─── COLORES por candidato ───
+# 13 colores categoricos (ColorBrewer Paired + extras)
+CAND_COLORS = [
+    '#E41A1C','#377EB8','#4DAF4A','#984EA3','#FF7F00',
+    '#FFFF33','#A65628','#F781BF','#999999','#66A61E',
+    '#E6AB02','#A6761D','#1B9E77',
+]
+cand_colors_dict = dict(zip(cand_order, CAND_COLORS[:len(cand_order)]))
+upz_geo_4326['COLOR_GANADOR'] = upz_geo_4326['GANADOR'].map(cand_colors_dict)
+
+# ─── RANGOS ───
+cand_ranges = {cand: {'min': float(upz_geo_4326[cand].min()), 'max': float(upz_geo_4326[cand].max())} for cand in cand_order}
+global_max_votos = float(upz_geo_4326[cand_order].values.max())
+
+diff_max_abs = {}
+for cand in cand_order:
+    d = max(abs(upz_geo_4326[f'diff_{cand}'].min()), abs(upz_geo_4326[f'diff_{cand}'].max()))
+    diff_max_abs[cand] = d if d > 0 else 1
+
+# ─── POPUP ───
+for idx in upz_geo_4326.index:
+    props = upz_geo_4326.loc[idx]
+    uplnombre = props.get('UPLNOMBRE', '')
+    locnombre = props.get('LOCNOMBRE', '')
+    total = int(props.get(total_col, 0) or 0)
+    rows = []
+    for cand in cand_order:
+        v = int(props.get(cand, 0) or 0)
+        p = props.get(f'pct_{cand}', 0)
+        rows.append((cand, v, p))
+    rows.sort(key=lambda x: x[1], reverse=True)
+    max_v = rows[0][1] if rows else 1
+    popup_rows = ''
+    for r in rows:
+        name, v, p = r
+        bar_pct = (v / max_v * 100) if max_v > 0 else 0
+        popup_rows += (
+            f'<tr><td style="padding:3px 6px">{name}</td>'
+            f'<td style="padding:3px 6px;text-align:right">{v:,}</td>'
+            f'<td style="padding:3px 6px;text-align:right">{p:.1f}%</td>'
+            f'<td style="padding:3px 6px;width:100px"><div style="background:#1a1a2e;height:10px;width:{bar_pct:.0f}%;border-radius:3px;min-width:2px"></div></td></tr>'
+        )
+    upz_geo_4326.at[idx, '_popup'] = (
+        f'<div style="min-width:320px;font-family:system-ui">'
+        f'<h4 style="margin:0 0 4px">{uplnombre}</h4>'
+        f'<p style="margin:0 0 8px;color:#666;font-size:13px">{locnombre} | Total: {total:,} votos</p>'
+        f'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+        f'<thead><tr style="background:#1a1a2e;color:white">'
+        f'<th style="padding:4px 6px;text-align:left">Candidato</th>'
+        f'<th style="padding:4px 6px;text-align:right">Votos</th>'
+        f'<th style="padding:4px 6px;text-align:right">%</th>'
+        f'<th style="padding:4px 6px;width:100px"></th></tr></thead>'
+        f'<tbody>{popup_rows}</tbody></table></div>'
+    )
+
+# ─── GEOJSON ───
+drop_cols = [c for c in upz_geo_4326.columns
+             if c not in cand_order
+             and not c.startswith('pct_')
+             and not c.startswith('diff_')
+             and c not in ['UPLCODIGO','UPLNOMBRE','LOCNOMBRE','LOCCODIGO',
+                           total_col,'_popup','GANADOR','MARGEN_VOTOS',
+                           'MARGEN_PCT','COLOR_GANADOR','GANADOR_IDX','geometry']]
+upz_clean = upz_geo_4326.drop(columns=drop_cols)
+geo_json_str = json.dumps(upz_clean.__geo_interface__, ensure_ascii=False)
+
+# ─── PALETAS ───
+ylorrd = ['#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026']
+rdbu = ['#2166ac','#4393c3','#92c5de','#d1e5f0','#f7f7f7','#fddbc7','#f4a582','#d6604d','#b2182b']
+purples = ['#f2f0f7','#dadaeb','#bcbddc','#9e9ac8','#807dba','#6a51a3','#54278f','#3f007d','#2c0055']
+
+# ─── HTML ───
+html = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa Electoral Bogotá 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * {{ margin:0; padding:0; box-sizing:border-box; font-family:system-ui,sans-serif; }}
+  body {{ background:#f0f2f5; }}
+  #map {{ width:100vw; height:100vh; }}
+  .panel {{
+    position:absolute; top:12px; right:12px; z-index:1000;
+    background:white; border-radius:8px; padding:10px 14px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+    font-size:13px; max-width:270px;
+  }}
+  .panel select, .panel label {{ display:block; width:100%; margin-bottom:4px; }}
+  .panel select {{
+    padding:6px 8px; border:1px solid #ccc; border-radius:5px;
+    font-size:13px; cursor:pointer; font-family:system-ui;
+  }}
+  .panel select:focus {{ outline:none; border-color:#1a1a2e; }}
+  .legend {{
+    position:absolute; bottom:30px; right:12px; z-index:1000;
+    background:white; padding:10px 14px; border-radius:8px;
+    font-size:12px; box-shadow:0 2px 8px rgba(0,0,0,0.15);
+    line-height:1.5; min-width:180px; display:none;
+  }}
+  .legend .bar {{ width:100%; height:14px; border-radius:3px; margin:4px 0; }}
+  .legend .labels {{ display:flex; justify-content:space-between; font-size:10px; color:#666; }}
+  .legend-item {{ display:flex; align-items:center; gap:6px; font-size:11px; padding:2px 0; }}
+  .legend-swatch {{ width:14px; height:14px; border-radius:3px; flex-shrink:0; }}
+  .hint {{ position:absolute; bottom:30px; left:12px; z-index:1000;
+    background:white; padding:6px 10px; border-radius:6px; font-size:11px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1); color:#666; }}
+  .checkbox-group {{ max-height:260px; overflow-y:auto; margin-top:6px; }}
+  .checkbox-group label {{ display:flex; align-items:center; gap:6px; padding:2px 0; font-size:12px; cursor:pointer; }}
+  .checkbox-group input {{ margin:0; }}
+  .sel-count {{ font-size:11px; color:#888; margin-top:4px; }}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="panel">
+  <select id="mode-selector">
+    <option value="winner">Ganador por UPZ (todos los candidatos)</option>
+    <option value="relative">Relativo (min-max por candidato)</option>
+    <option value="percentage">% del UPZ (0% a 100%)</option>
+    <option value="difference">Diferencia vs promedio</option>
+  </select>
+
+  <div id="cand-selector">
+    <div style="font-weight:500;margin:6px 0 2px;font-size:12px">Candidatos:</div>
+    <div class="checkbox-group" id="checkbox-group">
+      <label><input type="checkbox" id="check-all" checked onchange="toggleAll()"> <strong>Todos</strong></label>
+      {"".join(
+        f'<label><input type="checkbox" class="cand-check" value="{i}" checked onchange="updateSelected()"> '
+        f'<span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:{cand_colors_dict[cand]}"></span> '
+        f'{cand}</label>'
+        for i, cand in enumerate(cand_order)
+      )}
+    </div>
+    <div class="sel-count" id="sel-count">13 seleccionados</div>
+  </div>
+</div>
+
+<div class="legend" id="legend">
+  <div style="font-weight:600;margin-bottom:4px"><span id="legend-title">Ganador por UPZ</span></div>
+  <div id="legend-content"></div>
+  <div class="bar" id="legend-bar" style="display:none"></div>
+  <div class="labels" id="legend-labels" style="display:none">
+    <span id="legend-min">0</span>
+    <span id="legend-mid">0</span>
+    <span id="legend-max">0</span>
+  </div>
+</div>
+
+<div class="hint">Hover: info | Click: tabla completa candidatos</div>
+
+<script>
+(function() {{
+  var geoData = {geo_json_str};
+  var candOrder = {json.dumps(cand_order, ensure_ascii=False)};
+  var candColors = {json.dumps(cand_colors_dict, ensure_ascii=False)};
+  var globalMaxVotos = {global_max_votos};
+  var candRanges = {json.dumps(cand_ranges)};
+  var diffMaxAbs = {json.dumps(diff_max_abs)};
+  var ylorrd = {json.dumps(ylorrd)};
+  var rdbu = {json.dumps(rdbu)};
+  var purples = {json.dumps(purples)};
+
+  // Colores para leyenda de ganador (mas claros para fondo blanco)
+  var legendColors = {{}};
+  for (var c in candColors) {{
+    legendColors[c] = candColors[c];
+  }}
+
+  // Estado
+  var currentMode = 'winner';
+  var selectedCands = candOrder.map(function(_,i) {{ return i; }}); // all selected
+
+  function getSelectedIndices() {{
+    var checks = document.querySelectorAll('.cand-check:checked');
+    return Array.from(checks).map(function(c) {{ return parseInt(c.value); }});
+  }}
+
+  window.updateSelected = function() {{
+    selectedCands = getSelectedIndices();
+    document.getElementById('sel-count').textContent = selectedCands.length + ' seleccionado' + (selectedCands.length !== 1 ? 's' : '');
+    // Update "Todos" checkbox
+    var allCheck = document.getElementById('check-all');
+    var total = document.querySelectorAll('.cand-check').length;
+    var checked = selectedCands.length;
+    allCheck.checked = checked === total;
+    allCheck.indeterminate = checked > 0 && checked < total;
+    updateMap();
+  }};
+
+  window.toggleAll = function() {{
+    var checked = document.getElementById('check-all').checked;
+    document.querySelectorAll('.cand-check').forEach(function(c) {{ c.checked = checked; }});
+    updateSelected();
+  }};
+
+  // ─── MAPA ───
+  var map = L.map('map', {{ center:[4.65,-74.1], zoom:11, zoomControl:true }});
+  L.tileLayer('https://{{s}}.basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{
+    attribution:'&copy; <a href="https://carto.com">CARTO</a>', subdomains:'abcd', maxZoom:19
+  }}).addTo(map);
+
+  function buildTooltip(p) {{
+    var sel = selectedCands;
+    var mode = currentMode;
+    var extra = '';
+    if (mode === 'winner') {{
+      extra = 'Ganador: ' + (p.GANADOR || '');
+    }} else if (sel.length === 1) {{
+      var cand = candOrder[sel[0]];
+      if (mode === 'percentage') {{
+        extra = (p['pct_'+cand] || 0).toFixed(1) + '% para ' + cand;
+      }} else if (mode === 'difference') {{
+        var dv = p['diff_'+cand] || 0;
+        extra = (dv > 0 ? '+' : '') + Number(dv).toLocaleString() + ' vs promedio de ' + cand;
+      }} else {{
+        extra = Number(p[cand] || 0).toLocaleString() + ' votos para ' + cand;
+      }}
+    }} else if (sel.length === 2) {{
+      var c1 = candOrder[sel[0]], c2 = candOrder[sel[1]];
+      var v1 = p[c1] || 0, v2 = p[c2] || 0;
+      extra = c1 + ': ' + Number(v1).toLocaleString() + ' | ' + c2 + ': ' + Number(v2).toLocaleString();
+    }} else {{
+      extra = 'Ganador: ' + (p.GANADOR || '');
+    }}
+    var tt = '<strong>'+(p.UPLNOMBRE||'')+'</strong>';
+    if (p.LOCNOMBRE) tt += '<br><span style="color:#666;font-size:12px">'+p.LOCNOMBRE+'</span>';
+    if (extra) tt += '<br><span style="color:#1a1a2e;font-size:12px;font-weight:500">'+extra+'</span>';
+    if (p.TOTAL_VOTOS) tt += '<br><span style="color:#999;font-size:11px">Total: '+Number(p.TOTAL_VOTOS).toLocaleString()+' votos</span>';
+    return tt;
+  }}
+
+  function onEachFeature(feature, layer) {{
+    var p = feature.properties;
+    if (p._popup) layer.bindPopup(p._popup, {{ maxWidth:450 }});
+    layer.bindTooltip(buildTooltip(p), {{ sticky:false, direction:'top' }});
+  }}
+
+  var gjLayer = L.geoJson(geoData, {{
+    style: function() {{ return {{ fillColor:'#e0e0e0', fillOpacity:0.3, color:'#888', weight:1 }}; }},
+    onEachFeature: onEachFeature,
+  }}).addTo(map);
+
+  gjLayer.eachLayer(function(layer) {{
+    layer.on({{
+      mouseover: function(e) {{
+        e.target.setStyle({{ weight:2, color:'#000', fillOpacity:0.5 }});
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) e.target.bringToFront();
+      }},
+      mouseout: function(e) {{ applyStyle(e.target); }}
+    }});
+  }});
+
+  map.fitBounds(gjLayer.getBounds().pad(0.05));
+
+  // ─── LOGICA DE VISUALIZACION ───
+  function applyStyle(layer) {{
+    var p = layer.feature.properties;
+    var sel = selectedCands;
+    var mode = currentMode;
+
+    if (mode === 'winner') {{
+      // Siempre mostrar ganador
+      var color = p.COLOR_GANADOR || '#e0e0e0';
+      var alpha = 0.3 + (p.MARGEN_PCT || 0) / 100 * 0.6;
+      layer.setStyle({{ fillColor:color, fillOpacity:Math.min(alpha,0.9), color:'#555', weight:1 }});
+      return;
+    }}
+
+    // Modos que usan seleccion
+    if (sel.length === 0) {{
+      layer.setStyle({{ fillColor:'#e0e0e0', fillOpacity:0.3, color:'#888', weight:1 }});
+      return;
+    }}
+
+    if (sel.length === 1) {{
+      var cand = candOrder[sel[0]];
+      var val = (mode === 'percentage') ? p['pct_'+cand] || 0 : p[cand] || 0;
+      if (mode === 'difference') val = p['diff_'+cand] || 0;
+      layer.setStyle({{ fillColor:getColor(val, mode, sel[0]), fillOpacity:0.85, color:'#555', weight:1 }});
+      return;
+    }}
+
+    if (sel.length === 2) {{
+      // Mostrar diferencia entre los dos seleccionados
+      var c1 = candOrder[sel[0]], c2 = candOrder[sel[1]];
+      var v1 = p[c1] || 0, v2 = p[c2] || 0;
+      var diff = v1 - v2;
+      // Calcular max diff real entre estos dos candidatos
+      var maxAbs = 0;
+      geoData.features.forEach(function(f) {{
+        var d = Math.abs((f.properties[c1] || 0) - (f.properties[c2] || 0));
+        if (d > maxAbs) maxAbs = d;
+      }});
+      if (maxAbs === 0) maxAbs = 1;
+      var idx = Math.floor((diff / maxAbs + 1) / 2 * (rdbu.length - 1));
+      idx = Math.min(Math.max(0, Math.round(idx)), rdbu.length - 1);
+      layer.setStyle({{ fillColor:rdbu[idx], fillOpacity:0.85, color:'#555', weight:1 }});
+      return;
+    }}
+
+    // 3+ seleccionados: mostrar ganador
+    var color = p.COLOR_GANADOR || '#e0e0e0';
+    var alpha = 0.3 + (p.MARGEN_PCT || 0) / 100 * 0.6;
+    layer.setStyle({{ fillColor:color, fillOpacity:Math.min(alpha,0.9), color:'#555', weight:1 }});
+  }}
+
+  function refreshTooltips() {{
+    gjLayer.eachLayer(function(layer) {{
+      layer.unbindTooltip();
+      layer.bindTooltip(buildTooltip(layer.feature.properties), {{ sticky:false, direction:'top' }});
+    }});
+  }}
+
+  function getColor(value, mode, candIdx) {{
+    var cand = candOrder[candIdx];
+    var min, max, palette;
+    if (mode === 'relative') {{
+      min = candRanges[cand].min; max = candRanges[cand].max; palette = ylorrd;
+    }} else if (mode === 'percentage') {{
+      min = 0; max = 100; palette = purples;
+    }} else if (mode === 'difference') {{
+      var d = diffMaxAbs[cand];
+      min = -d; max = d;
+    }}
+    if (mode === 'difference') {{
+      var mid = (max+min)/2;
+      if (max===min) return rdbu[4];
+      var idx;
+      if (value <= mid) {{
+        idx = Math.floor(((value-min)/(mid-min))*3); idx = Math.min(idx,3);
+      }} else {{
+        idx = 4+Math.floor(((value-mid)/(max-mid))*4); idx = Math.min(idx,8);
+      }}
+      return rdbu[Math.max(0,idx)];
+    }}
+    if (max===min) return palette[0];
+    var idx = Math.floor(((value-min)/(max-min))*(palette.length-1));
+    idx = Math.min(idx, palette.length-1);
+    return palette[Math.max(0,idx)];
+  }}
+
+  function updateMap() {{
+    gjLayer.eachLayer(function(layer) {{ applyStyle(layer); }});
+    refreshTooltips();
+    updateLegend();
+  }}
+
+  function updateLegend() {{
+    var el = document.getElementById('legend-content');
+    var bar = document.getElementById('legend-bar');
+    var labels = document.getElementById('legend-labels');
+    var title = document.getElementById('legend-title');
+
+    if (currentMode === 'winner') {{
+      title.textContent = 'Ganador por UPZ (intensidad = margen)';
+      // Count UPZs per winner
+      var counts = {{}};
+      geoData.features.forEach(function(f) {{
+        var g = f.properties.GANADOR || 'Sin datos';
+        counts[g] = (counts[g] || 0) + 1;
+      }});
+      var html = '';
+      var sorted = candOrder.filter(function(c) {{ return counts[c]; }});
+      sorted.forEach(function(c) {{
+        html += '<div class="legend-item"><span class="legend-swatch" style="background:'+(candColors[c]||'#ccc')+'"></span> '+
+                c+' <span style="color:#888;font-size:10px">('+counts[c]+' UPZs)</span></div>';
+      }});
+      el.innerHTML = html;
+      bar.style.display = 'none';
+      labels.style.display = 'none';
+      document.getElementById('legend').style.display = 'block';
+      return;
+    }}
+
+    // Modo con un candidato o diferencia
+    bar.style.display = 'block';
+    labels.style.display = 'flex';
+
+    if (selectedCands.length === 1) {{
+      var cand = candOrder[selectedCands[0]];
+      title.textContent = document.getElementById('mode-selector').options[document.getElementById('mode-selector').selectedIndex].text + ' — ' + cand;
+      var legendPalette = (currentMode === 'percentage') ? purples : (currentMode === 'difference' ? rdbu : ylorrd);
+      bar.style.background = 'linear-gradient(to right, '+legendPalette.join(', ')+')';
+      var range;
+      if (currentMode === 'relative') range = candRanges[cand];
+      else if (currentMode === 'percentage') range = {{min:0, max:100}};
+      else range = {{min:-diffMaxAbs[cand], max:diffMaxAbs[cand]}};
+      if (currentMode === 'percentage') {{
+        document.getElementById('legend-min').textContent = '0%';
+        document.getElementById('legend-mid').textContent = '50%';
+        document.getElementById('legend-max').textContent = '100%';
+      }} else {{
+        var mid = Math.round((range.min+range.max)/2).toLocaleString();
+        document.getElementById('legend-min').textContent = Math.round(range.min).toLocaleString();
+        document.getElementById('legend-mid').textContent = mid;
+        document.getElementById('legend-max').textContent = Math.round(range.max).toLocaleString();
+      }}
+      el.innerHTML = '';
+      document.getElementById('legend').style.display = 'block';
+    }} else if (selectedCands.length === 2) {{
+      var c1 = candOrder[selectedCands[0]], c2 = candOrder[selectedCands[1]];
+      title.textContent = 'Diferencia: '+c1+' vs '+c2;
+      bar.style.background = 'linear-gradient(to right, '+rdbu.join(', ')+')';
+      document.getElementById('legend-min').textContent = 'M\u00e1s '+c2;
+      document.getElementById('legend-mid').textContent = 'Empate';
+      document.getElementById('legend-max').textContent = 'M\u00e1s '+c1;
+      el.innerHTML = '';
+      document.getElementById('legend').style.display = 'block';
+    }} else {{
+      // 0 or 3+ - hide legend
+      document.getElementById('legend').style.display = 'none';
+    }}
+  }}
+
+  // ─── EVENTOS ───
+  document.getElementById('mode-selector').addEventListener('change', function() {{
+    currentMode = this.value;
+    // Ocultar selector de candidatos en modo winner
+    document.getElementById('cand-selector').style.display = (currentMode === 'winner') ? 'none' : 'block';
+    updateMap();
+  }});
+
+  // Oculta checkboxes al inicio (modo winner por defecto)
+  document.getElementById('cand-selector').style.display = 'none';
+
+  // Render inicial
+  updateMap();
+}})();
+</script>
+</body>
+</html>"""
+
+map_path = os.path.join(OUT, 'mapa_bogota.html')
+with open(map_path, 'w', encoding='utf-8') as f:
+    f.write(html)
+
+print(f'  OK  {map_path}')
+print(f'      - Modo GANADOR: todos los candidatos visibles a la vez')
+print(f'      - Checkboxes multi-select para candidatos')
+print(f'      - 1 selec: choropleth (relative / % / difference) | 2 selec: diferencia | 3+: ganador')
+print(f'      - Paletas: YlOrRd (relative), Purples (%), RdBu (diferencia)')

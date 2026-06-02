@@ -1,0 +1,189 @@
+==========================================================================================
+DIAGNOSTICO DE MODOS DEL MAPA
+==========================================================================================
+
+--- MODO 1: GANADOR ---
+Cada UPZ se pinta del color del candidato que la gano.
+Intensidad = margen de victoria (% del total de la UPZ).
+Muestra distribucion geografica del poder politico.
+  UPR1: GANA ABELARDO DE LA ESPRIELLA                 con  1,629 votos (47.4%) | margen=15.6%
+  UPR3: GANA IVÁN CEPEDA CASTRO                       con  3,150 votos (64.2%) | margen=41.4%
+  UPR4: GANA IVÁN CEPEDA CASTRO                       con    584 votos (55.5%) | margen=24.6%
+  UPR5: GANA IVÁN CEPEDA CASTRO                       con  1,080 votos (97.6%) | margen=96.3%
+  UPZ1: GANA ABELARDO DE LA ESPRIELLA                 con  1,091 votos (47.7%) | margen=15.9%
+  UPZ10: GANA ABELARDO DE LA ESPRIELLA                 con 17,454 votos (47.9%) | margen=19.4%
+  UPZ100: GANA IVÁN CEPEDA CASTRO                       con 12,170 votos (40.8%) | margen=3.6%
+  UPZ101: GANA IVÁN CEPEDA CASTRO                       con  9,135 votos (46.4%) | margen=14.0%
+  UPZ102: GANA ABELARDO DE LA ESPRIELLA                 con 13,660 votos (44.2%) | margen=4.8%
+  UPZ103: GANA ABELARDO DE LA ESPRIELLA                 con  1,102 votos (40.2%) | margen=8.9%
+  UPZ104: GANA ABELARDO DE LA ESPRIELLA                 con  4,793 votos (36.4%) | margen=0.1%
+  UPZ105: GANA ABELARDO DE LA ESPRIELLA                 con  3,518 votos (46.8%) | margen=16.6%
+  UPZ106: GANA ABELARDO DE LA ESPRIELLA                 con  9,251 votos (47.0%) | margen=18.9%
+  UPZ107: GANA ABELARDO DE LA ESPRIELLA                 con  5,028 votos (39.4%) | margen=3.3%
+  UPZ108: GANA ABELARDO DE LA ESPRIELLA                 con  2,447 votos (43.9%) | margen=3.4%
+  UPZ109: GANA ABELARDO DE LA ESPRIELLA                 con  5,436 votos (51.9%) | margen=31.6%
+  UPZ11: GANA ABELARDO DE LA ESPRIELLA                 con  7,689 votos (41.3%) | margen=2.6%
+  UPZ110: GANA ABELARDO DE LA ESPRIELLA                 con 14,415 votos (49.5%) | margen=25.9%
+  UPZ111: GANA ABELARDO DE LA ESPRIELLA                 con  3,124 votos (44.2%) | margen=5.9%
+  UPZ112: GANA ABELARDO DE LA ESPRIELLA                 con 21,735 votos (49.3%) | margen=22.6%
+  UPZ113: GANA ABELARDO DE LA ESPRIELLA                 con 12,177 votos (44.2%) | margen=10.8%
+  UPZ114: GANA ABELARDO DE LA ESPRIELLA                 con 13,289 votos (51.2%) | margen=26.4%
+  UPZ115: GANA IVÁN CEPEDA CASTRO                       con  1,449 votos (40.2%) | margen=0.0%
+  UPZ116: GANA ABELARDO DE LA ESPRIELLA                 con  4,671 votos (39.4%) | margen=0.7%
+  UPZ12: GANA ABELARDO DE LA ESPRIELLA                 con  5,567 votos (48.6%) | margen=20.7%
+  UPZ13: GANA ABELARDO DE LA ESPRIELLA                 con 48,362 votos (55.9%) | margen=38.0%
+  UPZ14: GANA ABELARDO DE LA ESPRIELLA                 con 23,217 votos (56.9%) | margen=38.3%
+  UPZ15: GANA ABELARDO DE LA ESPRIELLA                 con 21,202 votos (60.2%) | margen=41.8%
+  UPZ16: GANA ABELARDO DE LA ESPRIELLA                 con 26,866 votos (63.9%) | margen=43.5%
+  UPZ17: GANA ABELARDO DE LA ESPRIELLA                 con 19,464 votos (51.6%) | margen=26.7%
+  UPZ18: GANA ABELARDO DE LA ESPRIELLA                 con 13,542 votos (52.1%) | margen=27.9%
+  UPZ19: GANA ABELARDO DE LA ESPRIELLA                 con 20,443 votos (54.5%) | margen=33.5%
+  UPZ20: GANA ABELARDO DE LA ESPRIELLA                 con 16,625 votos (58.5%) | margen=40.9%
+  UPZ21: GANA ABELARDO DE LA ESPRIELLA                 con 15,074 votos (50.4%) | margen=24.8%
+  UPZ22: GANA ABELARDO DE LA ESPRIELLA                 con 17,644 votos (44.5%) | margen=10.6%
+  UPZ23: GANA ABELARDO DE LA ESPRIELLA                 con 34,632 votos (57.3%) | margen=40.7%
+  UPZ24: GANA ABELARDO DE LA ESPRIELLA                 con 37,196 votos (53.8%) | margen=33.5%
+  UPZ25: GANA ABELARDO DE LA ESPRIELLA                 con 12,759 votos (54.9%) | margen=35.8%
+  UPZ26: GANA ABELARDO DE LA ESPRIELLA                 con 22,041 votos (40.7%) | margen=2.3%
+  UPZ27: GANA ABELARDO DE LA ESPRIELLA                 con 33,802 votos (40.5%) | margen=1.4%
+  UPZ28: GANA IVÁN CEPEDA CASTRO                       con 55,868 votos (46.2%) | margen=10.3%
+  UPZ29: GANA IVÁN CEPEDA CASTRO                       con 24,791 votos (40.2%) | margen=0.6%
+  UPZ3: GANA ABELARDO DE LA ESPRIELLA                 con  1,215 votos (65.7%) | margen=52.3%
+  UPZ30: GANA ABELARDO DE LA ESPRIELLA                 con 34,906 votos (41.5%) | margen=3.5%
+  UPZ31: GANA ABELARDO DE LA ESPRIELLA                 con 11,562 votos (45.3%) | margen=12.5%
+  UPZ32: GANA IVÁN CEPEDA CASTRO                       con 13,168 votos (59.6%) | margen=34.7%
+  UPZ33: GANA IVÁN CEPEDA CASTRO                       con 18,538 votos (53.2%) | margen=23.3%
+  UPZ34: GANA IVÁN CEPEDA CASTRO                       con 27,052 votos (54.4%) | margen=25.0%
+  UPZ35: GANA IVÁN CEPEDA CASTRO                       con  7,057 votos (42.4%) | margen=1.7%
+  UPZ36: GANA IVÁN CEPEDA CASTRO                       con 10,770 votos (45.8%) | margen=10.1%
+  UPZ37: GANA ABELARDO DE LA ESPRIELLA                 con  8,163 votos (46.6%) | margen=10.6%
+  UPZ38: GANA ABELARDO DE LA ESPRIELLA                 con 19,949 votos (41.1%) | margen=0.8%
+  UPZ39: GANA IVÁN CEPEDA CASTRO                       con 26,508 votos (47.5%) | margen=11.9%
+  UPZ40: GANA ABELARDO DE LA ESPRIELLA                 con 26,120 votos (44.7%) | margen=9.0%
+  UPZ41: GANA ABELARDO DE LA ESPRIELLA                 con 14,804 votos (42.2%) | margen=2.7%
+  UPZ42: GANA IVÁN CEPEDA CASTRO                       con 34,272 votos (48.1%) | margen=13.0%
+  UPZ43: GANA ABELARDO DE LA ESPRIELLA                 con 18,854 votos (43.8%) | margen=6.9%
+  UPZ44: GANA ABELARDO DE LA ESPRIELLA                 con 17,859 votos (43.4%) | margen=7.4%
+  UPZ45: GANA IVÁN CEPEDA CASTRO                       con 18,311 votos (43.7%) | margen=5.1%
+  UPZ46: GANA ABELARDO DE LA ESPRIELLA                 con 25,508 votos (42.2%) | margen=4.3%
+  UPZ47: GANA IVÁN CEPEDA CASTRO                       con 33,146 votos (46.2%) | margen=9.5%
+  UPZ48: GANA IVÁN CEPEDA CASTRO                       con 32,752 votos (47.9%) | margen=12.9%
+  UPZ49: GANA IVÁN CEPEDA CASTRO                       con 11,801 votos (49.9%) | margen=15.9%
+  UPZ50: GANA IVÁN CEPEDA CASTRO                       con 28,588 votos (62.1%) | margen=38.9%
+  UPZ51: GANA IVÁN CEPEDA CASTRO                       con 16,814 votos (61.8%) | margen=38.5%
+  UPZ52: GANA IVÁN CEPEDA CASTRO                       con  3,659 votos (64.3%) | margen=43.5%
+  UPZ53: GANA IVÁN CEPEDA CASTRO                       con 17,085 votos (55.9%) | margen=27.4%
+  UPZ54: GANA IVÁN CEPEDA CASTRO                       con 18,344 votos (55.1%) | margen=25.9%
+  UPZ55: GANA IVÁN CEPEDA CASTRO                       con 16,074 votos (59.8%) | margen=33.9%
+  UPZ56: GANA IVÁN CEPEDA CASTRO                       con 13,758 votos (59.8%) | margen=34.2%
+  UPZ57: GANA IVÁN CEPEDA CASTRO                       con 38,859 votos (60.3%) | margen=34.9%
+  UPZ58: GANA IVÁN CEPEDA CASTRO                       con 25,504 votos (61.9%) | margen=37.7%
+  UPZ59: GANA IVÁN CEPEDA CASTRO                       con  9,266 votos (64.2%) | margen=41.2%
+  UPZ61: GANA IVÁN CEPEDA CASTRO                       con  8,005 votos (65.4%) | margen=43.6%
+  UPZ62: GANA IVÁN CEPEDA CASTRO                       con 15,200 votos (49.8%) | margen=15.4%
+  UPZ65: GANA IVÁN CEPEDA CASTRO                       con 26,998 votos (52.7%) | margen=21.9%
+  UPZ66: GANA IVÁN CEPEDA CASTRO                       con 26,553 votos (57.5%) | margen=29.9%
+  UPZ67: GANA IVÁN CEPEDA CASTRO                       con 32,977 votos (62.0%) | margen=36.8%
+  UPZ68: GANA IVÁN CEPEDA CASTRO                       con 14,590 votos (63.0%) | margen=39.9%
+  UPZ69: GANA IVÁN CEPEDA CASTRO                       con 41,846 votos (58.0%) | margen=30.6%
+  UPZ70: GANA IVÁN CEPEDA CASTRO                       con 16,246 votos (60.3%) | margen=35.2%
+  UPZ71: GANA IVÁN CEPEDA CASTRO                       con 56,823 votos (49.5%) | margen=16.1%
+  UPZ72: GANA ABELARDO DE LA ESPRIELLA                 con 23,500 votos (42.1%) | margen=7.3%
+  UPZ73: GANA ABELARDO DE LA ESPRIELLA                 con 35,039 votos (40.2%) | margen=1.1%
+  UPZ74: GANA IVÁN CEPEDA CASTRO                       con 24,471 votos (47.1%) | margen=11.7%
+  UPZ75: GANA IVÁN CEPEDA CASTRO                       con 37,009 votos (42.9%) | margen=4.5%
+  UPZ76: GANA IVÁN CEPEDA CASTRO                       con  6,795 votos (52.3%) | margen=21.2%
+  UPZ78: GANA IVÁN CEPEDA CASTRO                       con  7,589 votos (43.1%) | margen=5.2%
+  UPZ79: GANA IVÁN CEPEDA CASTRO                       con 16,991 votos (48.6%) | margen=14.8%
+  UPZ80: GANA IVÁN CEPEDA CASTRO                       con  4,787 votos (44.5%) | margen=5.6%
+  UPZ81: GANA IVÁN CEPEDA CASTRO                       con 22,981 votos (51.5%) | margen=19.1%
+  UPZ82: GANA IVÁN CEPEDA CASTRO                       con 41,596 votos (52.1%) | margen=19.5%
+  UPZ83: GANA IVÁN CEPEDA CASTRO                       con  3,141 votos (53.0%) | margen=22.6%
+  UPZ84: GANA IVÁN CEPEDA CASTRO                       con 37,899 votos (55.1%) | margen=25.5%
+  UPZ85: GANA IVÁN CEPEDA CASTRO                       con 85,431 votos (57.9%) | margen=30.3%
+  UPZ86: GANA IVÁN CEPEDA CASTRO                       con 25,738 votos (58.5%) | margen=31.5%
+  UPZ87: GANA IVÁN CEPEDA CASTRO                       con 25,385 votos (59.9%) | margen=34.7%
+  UPZ88: GANA ABELARDO DE LA ESPRIELLA                 con 12,619 votos (55.4%) | margen=27.7%
+  UPZ89: GANA IVÁN CEPEDA CASTRO                       con  2,357 votos (55.1%) | margen=27.7%
+  UPZ9: GANA ABELARDO DE LA ESPRIELLA                 con 20,005 votos (40.3%) | margen=0.8%
+  UPZ90: GANA IVÁN CEPEDA CASTRO                       con  4,509 votos (34.7%) | margen=2.0%
+  UPZ91: GANA IVÁN CEPEDA CASTRO                       con  4,684 votos (49.2%) | margen=21.9%
+  UPZ92: GANA IVÁN CEPEDA CASTRO                       con  2,601 votos (54.6%) | margen=28.6%
+  UPZ93: GANA IVÁN CEPEDA CASTRO                       con  9,732 votos (51.4%) | margen=20.2%
+  UPZ94: GANA IVÁN CEPEDA CASTRO                       con 13,162 votos (54.5%) | margen=26.2%
+  UPZ95: GANA IVÁN CEPEDA CASTRO                       con  5,126 votos (56.5%) | margen=28.1%
+  UPZ96: GANA IVÁN CEPEDA CASTRO                       con  8,073 votos (63.9%) | margen=43.1%
+  UPZ97: GANA ABELARDO DE LA ESPRIELLA                 con 20,777 votos (52.1%) | margen=31.3%
+  UPZ98: GANA ABELARDO DE LA ESPRIELLA                 con 13,035 votos (45.9%) | margen=11.7%
+  UPZ99: GANA IVÁN CEPEDA CASTRO                       con 11,383 votos (39.3%) | margen=4.9%
+
+--- MODO 2 y 3: RELATIVO vs ABSOLUTO ---
+Para Cepeda vs Matamoros (extremos):
+  IVÁN CEPEDA CASTRO:
+    Relativo escala: 247 a 85,431
+    Absoluto escala: 0 a 85,431
+    Porcentaje escala: 0 a 100%
+    Top 5 UPZ:
+      BOSA CENTRAL                   | Realtivo: 85,431 | % UPZ: 57.9% | Absoluto: 85,431
+      TIBABUYES                      | Realtivo: 56,823 | % UPZ: 49.5% | Absoluto: 56,823
+      EL RINCON                      | Realtivo: 55,868 | % UPZ: 46.2% | Absoluto: 55,868
+      ISMAEL PERDOMO                 | Realtivo: 41,846 | % UPZ: 58.0% | Absoluto: 41,846
+      PATIO BONITO                   | Realtivo: 41,596 | % UPZ: 52.1% | Absoluto: 41,596
+
+  GUSTAVO MATAMOROS CAMACHO:
+    Relativo escala: 1 a 35
+    Absoluto escala: 0 a 85,431
+    Porcentaje escala: 0 a 100%
+    Top 5 UPZ:
+      BOSA CENTRAL                   | Realtivo:     35 | % UPZ: 0.0% | Absoluto:     35
+      EL RINCON                      | Realtivo:     28 | % UPZ: 0.0% | Absoluto:     28
+      GRAN YOMASA                    | Realtivo:     26 | % UPZ: 0.0% | Absoluto:     26
+      ISMAEL PERDOMO                 | Realtivo:     25 | % UPZ: 0.0% | Absoluto:     25
+      TIBABUYES                      | Realtivo:     22 | % UPZ: 0.0% | Absoluto:     22
+
+--- MODO 5: DIFERENCIA VS PROMEDIO ---
+  IVÁN CEPEDA CASTRO: media=15233
+    Mejor que promedio:
+      BOSA CENTRAL                   | votos=85,431 | diff=+70,198
+      TIBABUYES                      | votos=56,823 | diff=+41,590
+      EL RINCON                      | votos=55,868 | diff=+40,635
+    Peor que promedio:
+      GUAYMARAL                      | votos=   247 | diff=-14,986
+      UPR RIO BLANCO                 | votos=   584 | diff=-14,649
+      PASEO DE LOS LIBERTADORES      | votos=   727 | diff=-14,506
+
+  ABELARDO DE LA ESPRIELLA: media=13762
+    Mejor que promedio:
+      LOS CEDROS                     | votos=48,362 | diff=+34,600
+      EL RINCON                      | votos=43,412 | diff=+29,650
+      BOSA CENTRAL                   | votos=40,681 | diff=+26,919
+    Peor que promedio:
+      UPR RIO SUMAPAZ                | votos=    14 | diff=-13,748
+      UPR RIO BLANCO                 | votos=   325 | diff=-13,437
+      PASEO DE LOS LIBERTADORES      | votos= 1,091 | diff=-12,671
+
+  PALOMA VALENCIA LASERNA: media=3339
+    Mejor que promedio:
+      LOS CEDROS                     | votos=12,998 | diff=+9,659
+      NIZA                           | votos= 9,829 | diff=+6,490
+      EL RINCON                      | votos= 9,527 | diff=+6,188
+    Peor que promedio:
+      UPR RIO SUMAPAZ                | votos=     2 | diff=-3,337
+      UPR RIO BLANCO                 | votos=    87 | diff=-3,252
+      PASEO DE LOS LIBERTADORES      | votos=   234 | diff=-3,105
+
+--- 2 CANDIDATOS SELECCIONADOS: Cepeda vs Espriella ---
+  Max diferencia absoluta entre estos 2: 44,750 votos
+  Global max votos (usado en codigo): 85,431
+  >> PROBLEMA: la escala usa 85431:,0 en lugar de 44,750
+     Para candidatos chicos, diff/maxGlobal ~ 0 -> todo blanco
+
+==========================================================================================
+CONCLUSIONES:
+==========================================================================================
+1. GANADOR: funciona bien, visualmente distinto
+2. RELATIVO vs ABSOLUTO: casi identicos para el candidato lider
+3. % UPZ: distinto para UPZs chicas con alta concentracion
+4. DIFERENCIA: visualmente distinto (RdBu), muestra desviacion
+5. 2-CAND COMPARISON: ESCALA ROTA - usa max global en vez de rango real
+6. Todos los modos se ven igual para candidatos chicos (0-50 votos)
