@@ -6,12 +6,18 @@ Procesa el Excel comparativo 2022-2026 y genera:
 
 import pandas as pd
 import numpy as np
-import os, json
+import os, json, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _utils import fix_name
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAW = os.path.join(BASE, 'data', 'raw')
 PROC = os.path.join(BASE, 'data', 'processed')
 OUT = os.path.join(BASE, 'outputs')
-XLSX = r'C:\Users\RYZEN\Downloads\bogota_electoral_2022_2026 4.xlsx'
+# Buscar el Excel en RAW o Downloads
+XLSX = os.path.join(RAW, 'bogota_electoral_2022_2026.xlsx')
+if not os.path.exists(XLSX):
+    XLSX = os.path.join(os.path.expanduser('~'), 'Downloads', 'bogota_electoral_2022_2026 4.xlsx')
 
 # ─── LEER SHEET 1: Resumen por Localidad ───
 # El Excel tiene headers multi-fila. Leemos sin header y parseamos manual.
@@ -77,17 +83,6 @@ print(f'      - {len(comparativo)} localidades con datos comparativos')
 # ─── ASIGNAR A UPZ ───
 # Cargar votos por UPZ para mapear localidad -> UPZ
 votos = pd.read_csv(os.path.join(PROC, 'votos_por_upz.csv'))
-
-def fix_name(n):
-    raw = n.encode('utf-8')
-    fixes = {
-        b'IV\xc3\x83\xc2\x81N CEPEDA CASTRO': 'IV\u00c1N CEPEDA CASTRO',
-        b'CLAUDIA L\xc3\x83\xe2\x80\x9cPEZ': 'CLAUDIA L\u00d3PEZ',
-        b'RA\xc3\x83\xc5\xa1L SANTIAGO BOTERO JARAMILLO': 'RA\u00daL SANTIAGO BOTERO JARAMILLO',
-        b'\xc3\x83\xe2\x80\x9cSCAR MAURICIO LIZCANO ARANGO': '\u00d3SCAR MAURICIO LIZCANO ARANGO',
-        b'MIGUEL URIBE LONDO\xc3\x83\xe2\x80\x98O': 'MIGUEL URIBE LONDO\u00d1O',
-    }
-    return fixes.get(raw, n)
 
 votos['CANNOMBRE'] = votos['CANNOMBRE'].apply(fix_name)
 votos['LOCNOMBRE'] = votos['LOCNOMBRE'].str.strip().str.upper()

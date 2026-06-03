@@ -4,29 +4,14 @@ Script maestro: corrige encoding, precalcula columnas, genera Excel mejorado y C
 
 import pandas as pd
 import numpy as np
-import os
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _utils import fix_name
 
-BASE = 'C:/Users/RYZEN/analisis-electoral-bogota'
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROC = os.path.join(BASE, 'data', 'processed')
 OUT = os.path.join(BASE, 'outputs')
 os.makedirs(OUT, exist_ok=True)
-
-# ═══════════════════════════════════════════════════
-# 1. CORREGIR MOJIBAKE en nombres de candidatos
-# ═══════════════════════════════════════════════════
-
-# Mojibake fix: match on UTF-8 bytes
-def fix_name(n):
-    raw = n.encode('utf-8')
-    # Ordered by specificity (longer match first)
-    fixes = {
-        b'IV\xc3\x83\xc2\x81N CEPEDA CASTRO': 'IVÁN CEPEDA CASTRO',
-        b'CLAUDIA L\xc3\x83\xe2\x80\x9cPEZ': 'CLAUDIA LÓPEZ',
-        b'RA\xc3\x83\xc5\xa1L SANTIAGO BOTERO JARAMILLO': 'RAÚL SANTIAGO BOTERO JARAMILLO',
-        b'\xc3\x83\xe2\x80\x9cSCAR MAURICIO LIZCANO ARANGO': 'ÓSCAR MAURICIO LIZCANO ARANGO',
-        b'MIGUEL URIBE LONDO\xc3\x83\xe2\x80\x98O': 'MIGUEL URIBE LONDOÑO',
-    }
-    return fixes.get(raw, n)
 
 # ═══════════════════════════════════════════════════
 # 2. CARGAR Y LIMPIAR DATOS

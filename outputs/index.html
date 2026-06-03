@@ -3,248 +3,810 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Análisis Electoral Bogotá 2026</title>
+<title>Elecciones Presidenciales 2026 - Bogota D.C.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui,-apple-system,sans-serif; }
-  body { background:#f0f2f5; color:#333; }
-  .header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%); color:white; padding:24px 20px; text-align:center; }
-  .header h1 { font-size:26px; letter-spacing:-0.5px; }
-  .header p { font-size:14px; opacity:0.75; margin-top:4px; }
-  .container { max-width:1400px; margin:0 auto; padding:20px; }
-  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
-  .stat-card { background:white; border-radius:10px; padding:16px 20px; box-shadow:0 1px 4px rgba(0,0,0,0.08); text-align:center; }
-  .stat-card .num { font-size:28px; font-weight:700; color:#1a1a2e; }
-  .stat-card .label { font-size:12px; color:#666; margin-top:4px; }
-  .section { background:white; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
-  .section-title { font-size:17px; font-weight:600; margin-bottom:16px; color:#1a1a2e; }
-  .map-frame { width:100%; height:620px; border:none; border-radius:6px; }
-  .chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .chart-grid img { width:100%; height:auto; border-radius:6px; border:1px solid #eee; }
-  .chart-full img { width:100%; height:auto; border-radius:6px; border:1px solid #eee; }
-  .table-controls { display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
-  .table-controls input, .table-controls select { padding:8px 12px; border:1px solid #ccc; border-radius:6px; font-size:13px; flex:1; min-width:150px; }
-  .table-controls input:focus, .table-controls select:focus { outline:none; border-color:#1a1a2e; }
-  .table-wrap { overflow-x:auto; max-height:520px; overflow-y:auto; border-radius:6px; border:1px solid #eee; }
-  table { width:100%; border-collapse:collapse; font-size:12px; }
-  th { background:#1a1a2e; color:white; padding:7px 8px; text-align:left; white-space:nowrap; cursor:pointer; position:sticky; top:0; z-index:1; }
-  th:hover { background:#2a2a4e; }
-  td { padding:5px 8px; border-bottom:1px solid #eee; }
-  tr:hover { background:#f0f4ff; }
-  .cat-Seguro { color:#2d7d2d; font-weight:600; }
-  .cat-Competido { color:#cc7a00; font-weight:600; }
-  .cat-Empate { color:#c00; font-weight:600; }
-  .winner-cell { font-weight:600; color:#1a1a2e; }
-  .bar-cell { display:inline-block; height:14px; border-radius:3px; background:#1a1a2e; }
-  .badge { background:#1a1a2e; color:white; font-size:11px; padding:2px 8px; border-radius:10px; }
-  .count { font-size:13px; color:#666; margin-bottom:8px; }
-  @media (max-width:900px) { .stats { grid-template-columns:1fr 1fr; } .chart-grid { grid-template-columns:1fr; } }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#F5F5F5; color:#212121; line-height:1.5; -webkit-font-smoothing:antialiased; }
+
+  .card { background:#FFFFFF; border-radius:12px; border:1px solid #F0F0F0;
+    box-shadow:0 1px 3px rgba(0,0,0,0.06); transition:box-shadow 0.2s, transform 0.2s; }
+  .card:hover { box-shadow:0 4px 12px rgba(0,0,0,0.12); }
+  .card-header { padding:20px 24px 0; }
+  .card-body { padding:20px 24px; }
+  .card-title { font-size:16px; font-weight:600; color:#212121; margin-bottom:4px; }
+  .card-subtitle { font-size:12px; color:#616161; }
+
+  .btn { display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 16px;
+    border:none; border-radius:8px; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size:13px; font-weight:500;
+    cursor:pointer; transition:all 0.15s; text-decoration:none; line-height:1; }
+  .btn-primary { background:#B71C1C; color:white; }
+  .btn-primary:hover { background:#E53935; }
+  .btn-outline { background:transparent; border:1.5px solid #E0E0E0; color:#212121; }
+  .btn-outline:hover { border-color:#B71C1C; color:#B71C1C; }
+  .btn-outline.active { background:#FFEBEE; border-color:#B71C1C; color:#B71C1C; }
+  .btn-ghost { background:transparent; color:#616161; }
+  .btn-ghost:hover { background:#F0F0F0; color:#212121; }
+  .btn-sm { height:28px; padding:0 10px; font-size:11px; border-radius:6px; }
+  .btn-icon { width:36px; padding:0; justify-content:center; }
+
+  .input { height:36px; padding:0 12px; border:1.5px solid #E0E0E0; border-radius:8px;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size:13px; color:#212121;
+    transition:border-color 0.15s, box-shadow 0.15s; background:#FFFFFF; }
+  .input:focus { outline:none; border-color:#B71C1C; box-shadow:0 0 0 3px #FFEBEE; }
+  .input::placeholder { color:#9E9E9E; }
+
+  .select { height:36px; padding:0 32px 0 12px; border:1.5px solid #E0E0E0; border-radius:8px;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size:13px; color:#212121;
+    background:#FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239E9E9E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+    -webkit-appearance:none; appearance:none; cursor:pointer; transition:border-color 0.15s; }
+  .select:focus { outline:none; border-color:#B71C1C; box-shadow:0 0 0 3px #FFEBEE; }
+
+  .table-wrap { overflow-x:auto; border-radius:8px; border:1px solid #F0F0F0; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:#F5F5F5; color:#616161; font-weight:500; font-size:11px;
+    text-transform:uppercase; letter-spacing:0.5px; padding:10px 12px; text-align:left;
+    white-space:nowrap; cursor:pointer; position:sticky; top:0; z-index:1;
+    border-bottom:1px solid #E0E0E0; user-select:none; }
+  th:hover { color:#B71C1C; }
+  th .sort-arrow { display:inline-block; margin-left:4px; opacity:0; transition:opacity 0.15s; }
+  th:hover .sort-arrow, th.sort-active .sort-arrow { opacity:0.5; }
+  th.sort-asc .sort-arrow, th.sort-desc .sort-arrow { opacity:1; }
+  td { padding:8px 12px; border-bottom:1px solid #F0F0F0; }
+  tr:nth-child(even) td { background:#F5F5F5; }
+  tr:hover td { background:#FFEBEE; }
+
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:6px;
+    font-size:11px; font-weight:500; line-height:1.4; }
+  .badge-primary { background:#FFEBEE; color:#B71C1C; }
+  .badge-success { background:#E8F5E9; color:#2E7D32; }
+  .badge-warning { background:#FFF3E0; color:#E65100; }
+  .badge-error { background:#FFEBEE; color:#C62828; }
+  .badge-neutral { background:#F0F0F0; color:#616161; }
+
+  .stat-card { background:white; border-radius:12px; padding:20px; border:1px solid #F0F0F0;
+    box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .stat-card .stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
+  .stat-card .stat-icon.primary { background:#FFEBEE; color:#B71C1C; }
+  .stat-card .stat-icon.accent { background:#E3F2FD; color:#1565C0; }
+  .stat-card .stat-icon.success { background:#E8F5E9; color:#2E7D32; }
+  .stat-card .stat-icon.warning { background:#FFF3E0; color:#E65100; }
+  .stat-card .stat-num { font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace; font-size:28px; font-weight:700; color:#212121; line-height:1.1; }
+  .stat-card .stat-label { font-size:12px; color:#616161; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
+  .stat-card .stat-bar { height:3px; border-radius:2px; margin-top:12px; background:#F0F0F0; overflow:hidden; }
+  .stat-card .stat-bar-fill { height:100%; border-radius:2px; transition:width 0.6s ease; }
+
+  .section-nav { display:flex; gap:4px; padding:4px; background:#FFFFFF;
+    border-radius:10px; border:1px solid #F0F0F0; overflow-x:auto;
+    position:sticky; top:0; z-index:100; }
+  .section-nav a { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:6px;
+    font-size:12px; font-weight:500; color:#616161; text-decoration:none;
+    white-space:nowrap; transition:all 0.15s; }
+  .section-nav a:hover { background:#F0F0F0; color:#212121; }
+  .section-nav a.active { background:#FFEBEE; color:#B71C1C; }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+  .anim-fade-in { animation:fadeIn 0.3s ease both; }
+  .anim-fade-up { animation:fadeInUp 0.4s ease both; }
+  .anim-scale { animation:scaleIn 0.25s ease both; }
+  .anim-delay-1 { animation-delay:0.05s; }
+  .anim-delay-2 { animation-delay:0.1s; }
+  .anim-delay-3 { animation-delay:0.15s; }
+  .anim-delay-4 { animation-delay:0.2s; }
+
+body { padding-bottom:48px; }
+.hero { background:linear-gradient(135deg, #B71C1C 0%, #8E0000 50%, #B71C1C 100%);
+  color:white; padding:32px 24px; position:relative; overflow:hidden; }
+.hero::after { content:''; position:absolute; top:0; right:0; width:300px; height:100%;
+  background:linear-gradient(135deg, transparent 30%, rgba(249,168,37,0.15) 100%); }
+.hero h1 { font-size:28px; font-weight:700; letter-spacing:-0.5px; position:relative; z-index:1; }
+.hero p { font-size:14px; opacity:0.8; margin-top:4px; position:relative; z-index:1; }
+.hero-meta { display:flex; gap:16px; margin-top:12px; flex-wrap:wrap; position:relative; z-index:1; }
+.hero-meta span { font-size:12px; opacity:0.7; }
+.container { max-width:1400px; margin:0 auto; padding:0 24px; }
+
+.section { margin-top:24px; }
+.section-title { font-size:18px; font-weight:600; color:#212121; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+
+/* Stats grid */
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+@media (max-width:768px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:640px) { .stats-grid { grid-template-columns:1fr; } }
+
+/* Chart grid */
+.chart-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.chart-row .card-body { padding:16px; }
+.chart-box { width:100%; height:400px; }
+.chart-tall { height:500px; }
+@media (max-width:768px) { .chart-row { grid-template-columns:1fr; } }
+
+/* Full width sections */
+.full-card { background:white; border-radius:12px; border:1px solid #F0F0F0;
+  box-shadow:0 1px 3px rgba(0,0,0,0.06); padding:24px; margin-bottom:20px; }
+
+/* Map iframe */
+.map-frame { width:100%; height:620px; border:none; border-radius:8px; }
+@media (max-width:640px) { .map-frame { height:400px; } }
+
+/* Table controls */
+.table-controls { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+.table-controls .input { flex:1; min-width:180px; }
+.table-controls .select { min-width:150px; }
+
+/* ECharts tooltip override */
+.echarts-tooltip { font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; }
+
+/* Footer */
+.footer { text-align:center; padding:24px; color:#9E9E9E; font-size:12px; }
+
+/* Sticky nav */
+.section-nav-wrap { position:sticky; top:0; z-index:100; margin-bottom:24px; }
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>Elecciones Presidenciales Colombia 2026 &mdash; Primera Vuelta</h1>
-  <p>Resultados por UPZ en Bogot&aacute; D.C. &middot; Datos: Registradur&iacute;a Nacional + IDECA</p>
+
+<div class="hero">
+  <h1>Elecciones Presidenciales 2026</h1>
+  <p>Primera vuelta &middot; Resultados por UPZ en Bogota D.C.</p>
+  <div class="hero-meta">
+    <span>Datos: Registraduria Nacional + IDECA</span>
+    <span>110 UPZs &middot; 20 localidades &middot; 13 candidatos</span>
+    <span>Procesado: 02 June 2026</span>
+  </div>
 </div>
+
 <div class="container">
 
-<div class="stats">
-  <div class="stat-card"><div class="num">3,952,417</div><div class="label">Votos procesados</div></div>
-  <div class="stat-card"><div class="num">110</div><div class="label">UPZs</div></div>
-  <div class="stat-card"><div class="num">20</div><div class="label">Localidades</div></div>
-  <div class="stat-card"><div class="num">13</div><div class="label">Candidatos</div></div>
+<div class="section-nav-wrap">
+  <nav class="section-nav" id="section-nav">
+    <a href="#resumen" class="active">Resumen</a>
+    <a href="#mapa">Mapa</a>
+    <a href="#graficos">Graficos</a>
+    <a href="#detalle">Detalle UPZ</a>
+    <a href="#minimapas">Candidatos</a>
+    <a href="#comparativo">Comparativo 22-26</a>
+  </nav>
 </div>
 
-<div class="section">
-  <div class="section-title">Mapa interactivo <span class="badge">5 modos: ganador / relativo / % / diferencia / comparativo 22-26 + multi-select</span></div>
-  <iframe class="map-frame" src="mapa_bogota.html"></iframe>
+<!-- ═══ RESUMEN ═══ -->
+<section id="resumen" class="section">
+  <div class="stats-grid">
+    <div class="stat-card anim-fade-up anim-delay-1">
+      <div class="stat-icon primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+      </div>
+      <div class="stat-num">3,952,417</div>
+      <div class="stat-label">Votos procesados</div>
+      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:#B71C1C"></div></div>
+    </div>
+    <div class="stat-card anim-fade-up anim-delay-2">
+      <div class="stat-icon accent">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="stat-num">110</div>
+      <div class="stat-label">UPZs</div>
+      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:#1565C0"></div></div>
+    </div>
+    <div class="stat-card anim-fade-up anim-delay-3">
+      <div class="stat-icon success">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      </div>
+      <div class="stat-num">20</div>
+      <div class="stat-label">Localidades</div>
+      <div class="stat-bar"><div class="stat-bar-fill" style="width:100.0%;background:#2E7D32"></div></div>
+    </div>
+    <div class="stat-card anim-fade-up anim-delay-4">
+      <div class="stat-icon warning">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="stat-num">13</div>
+      <div class="stat-label">Candidatos</div>
+      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:#E65100"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MAPA ═══ -->
+<section id="mapa" class="section">
+  <div class="section-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+    Mapa interactivo
+    <span class="badge badge-primary">5 modos + multi-select + toggle UPZ/Localidad</span>
+  </div>
+  <div class="full-card" style="padding:0;overflow:hidden">
+    <iframe class="map-frame" src="mapa_bogota.html" title="Mapa electoral interactivo"></iframe>
+  </div>
+</section>
+
+<!-- ═══ GRAFICOS ═══ -->
+<section id="graficos" class="section">
+  <div class="section-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Graficos interactivos
+  </div>
+
+  <div class="chart-row">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Votos totales por candidato</div><div class="card-subtitle">Distribucion del voto en Bogota D.C.</div></div>
+      <div class="card-body"><div class="chart-box" id="chart-candidatos"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Top 10 UPZ - Distribucion porcentual</div><div class="card-subtitle">Composicion del voto en las UPZs con mas votantes</div></div>
+      <div class="card-body"><div class="chart-box" id="chart-upz-dist"></div></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Matriz candidato por localidad</div><div class="card-subtitle">Porcentaje de votacion por candidato en cada localidad</div></div>
+      <div class="card-body"><div class="chart-box chart-tall" id="chart-matriz"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Brecha Cepeda vs Espriella</div><div class="card-subtitle">Diferencia porcentual en las 30 UPZs mas polarizadas</div></div>
+      <div class="card-body"><div class="chart-box chart-tall" id="chart-brecha"></div></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Comparativo 2022 vs 2026</div><div class="card-subtitle">Correlacion entre el voto de Petro (2022) y Cepeda (2026) por localidad</div></div>
+      <div class="card-body"><div class="chart-box" id="chart-scatter"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Evolucion por localidad</div><div class="card-subtitle">Petro 2022 vs Cepeda 2026 y delta en puntos porcentuales</div></div>
+      <div class="card-body"><div class="chart-box" id="chart-dual"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TABLA UPZ ═══ -->
+<section id="detalle" class="section">
+  <div class="section-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Detalle por UPZ
+    <span class="badge badge-neutral" id="row-count">110 UPZs</span>
+  </div>
+  <div class="full-card">
+    <div class="table-controls">
+      <input class="input" type="text" id="search-input" placeholder="Buscar UPZ o codigo..." onkeyup="filterTable()">
+      <select class="select" id="loc-filter" onchange="filterTable()">
+        <option value="">Todas las localidades</option>
+        <option value="ANTONIO NARIÑO">ANTONIO NARIÑO</option><option value="BARRIOS UNIDOS">BARRIOS UNIDOS</option><option value="BOSA">BOSA</option><option value="CANDELARIA">CANDELARIA</option><option value="CHAPINERO">CHAPINERO</option><option value="CIUDAD BOLIVAR">CIUDAD BOLIVAR</option><option value="ENGATIVA">ENGATIVA</option><option value="FONTIBON">FONTIBON</option><option value="KENNEDY">KENNEDY</option><option value="LOS MARTIRES">LOS MARTIRES</option><option value="PUENTE ARANDA">PUENTE ARANDA</option><option value="RAFAEL URIBE URIBE">RAFAEL URIBE URIBE</option><option value="SAN CRISTOBAL">SAN CRISTOBAL</option><option value="SANTA FE">SANTA FE</option><option value="SUBA">SUBA</option><option value="SUMAPAZ">SUMAPAZ</option><option value="TEUSAQUILLO">TEUSAQUILLO</option><option value="TUNJUELITO">TUNJUELITO</option><option value="USAQUEN">USAQUEN</option><option value="USME">USME</option>
+      </select>
+      <select class="select" id="cat-filter" onchange="filterTable()">
+        <option value="">Todas las categorias</option>
+        <option value="Seguro">Seguro</option>
+        <option value="Competido">Competido</option>
+        <option value="Empate">Empate tecnico</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table id="upz-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">UPZ <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(1)">Nombre <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(2)">Localidad <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(3)">Votos <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(4)">Ganador <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(5)">% <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(6)">Segundo <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(7)">Diferencia <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(8)">Margen <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(9)">Categoria <span class="sort-arrow">&#9650;</span></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SMALL MULTIPLES ═══ -->
+<section id="minimapas" class="section">
+  <div class="section-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Todos los candidatos
+    <span class="badge badge-primary">13 mini-mapas</span>
+  </div>
+  <div class="full-card" style="padding:0;overflow:hidden">
+    <iframe src="small_multiples.html" style="width:100%;height:460px;border:none" title="Small multiples de candidatos"></iframe>
+  </div>
+</section>
+
+<!-- ═══ COMPARATIVO ═══ -->
+<section id="comparativo" class="section">
+  <div class="section-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Comparativo 2022-2026
+    <span class="badge badge-primary" id="comp-pair-badge">Petro 22 vs Cepeda 26</span>
+  </div>
+
+  <div class="stats-grid" style="margin-bottom:16px">
+    <div class="stat-card">
+      <div class="stat-icon warning">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="stat-num" id="comp-mejor">-</div>
+      <div class="stat-label">Mejor desempeno</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon error">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+      </div>
+      <div class="stat-num" id="comp-peor">-</div>
+      <div class="stat-label">Peor desempeno</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div class="stat-num" id="comp-pct22">-</div>
+      <div class="stat-label">% 2022 citywide</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon accent">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="stat-num" id="comp-pct26">-</div>
+      <div class="stat-label">% 2026 citywide</div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Comparacion de pares</div>
+        <div class="card-subtitle">2022 vs 2026 para cada par de candidatos comparable</div>
+      </div>
+      <div class="card-body"><div class="chart-box" id="chart-comp-heatmap"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Distribucion de deltas</div>
+        <div class="card-subtitle">Variacion en puntos porcentuales entre elecciones</div>
+      </div>
+      <div class="card-body"><div class="chart-box" id="chart-comp-box"></div></div>
+    </div>
+  </div>
+
+  <div class="full-card">
+    <div class="table-controls" style="justify-content:space-between">
+      <div style="display:flex;gap:8px;align-items:center">
+        <label style="font-size:12px;font-weight:500;color:#616161">Par a comparar:</label>
+        <select class="select" id="comp-pair-select" onchange="switchComparativo(this.value)" style="min-width:220px">
+          <option value="0">Petro 22 vs Cepeda 26</option><option value="1">Hernandez 22 vs Espriella 26</option><option value="2">Gutierrez 22 vs Fajardo 26</option><option value="3">Petro 2v 22 vs Cepeda 26</option>
+        </select>
+      </div>
+      <span class="badge badge-neutral" id="comp-count">20 localidades</span>
+    </div>
+    <div class="table-wrap" style="max-height:420px">
+      <table id="comp-table">
+        <thead>
+          <tr>
+            <th onclick="sortComp(0)">Localidad</th>
+            <th onclick="sortComp(1)" id="comp-th22">% 2022</th>
+            <th onclick="sortComp(2)" id="comp-th26">% 2026</th>
+            <th onclick="sortComp(3)">Delta (pp)</th>
+            <th onclick="sortComp(4)">Votos 2022</th>
+            <th onclick="sortComp(5)">Votos 2026</th>
+            <th onclick="sortComp(6)">Situacion</th>
+          </tr>
+        </thead>
+        <tbody id="comp-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 </div>
 
-<div class="chart-grid">
-  <div class="section">
-    <div class="section-title">Votos totales por candidato</div>
-    <img src="top_candidatos.png" alt="Top candidatos" loading="lazy">
-  </div>
-  <div class="section">
-    <div class="section-title">Top 10 UPZ - Distribución %</div>
-    <img src="votos_upz_top10.png" alt="Votos por UPZ" loading="lazy">
-  </div>
-</div>
-
-<div class="chart-grid">
-  <div class="section">
-    <div class="section-title">Matriz candidato × localidad</div>
-    <img src="matriz_candidato_localidad.png" alt="Matriz" loading="lazy">
-  </div>
-  <div class="section">
-    <div class="section-title">Brecha Cepeda vs De La Espriella</div>
-    <img src="brecha_geografica.png" alt="Brecha" loading="lazy">
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">Resumen completo por UPZ</div>
-  <div class="table-controls">
-    <input type="text" id="search-input" placeholder="Buscar UPZ..." onkeyup="filterTable()">
-    <select id="loc-filter" onchange="filterTable()">
-      <option value="">Todas las localidades</option>
-      <option value="ANTONIO NARIÑO">ANTONIO NARIÑO</option><option value="BARRIOS UNIDOS">BARRIOS UNIDOS</option><option value="BOSA">BOSA</option><option value="CANDELARIA">CANDELARIA</option><option value="CHAPINERO">CHAPINERO</option><option value="CIUDAD BOLIVAR">CIUDAD BOLIVAR</option><option value="ENGATIVA">ENGATIVA</option><option value="FONTIBON">FONTIBON</option><option value="KENNEDY">KENNEDY</option><option value="LOS MARTIRES">LOS MARTIRES</option><option value="PUENTE ARANDA">PUENTE ARANDA</option><option value="RAFAEL URIBE URIBE">RAFAEL URIBE URIBE</option><option value="SAN CRISTOBAL">SAN CRISTOBAL</option><option value="SANTA FE">SANTA FE</option><option value="SUBA">SUBA</option><option value="SUMAPAZ">SUMAPAZ</option><option value="TEUSAQUILLO">TEUSAQUILLO</option><option value="TUNJUELITO">TUNJUELITO</option><option value="USAQUEN">USAQUEN</option><option value="USME">USME</option>
-    </select>
-    <select id="cat-filter" onchange="filterTable()">
-      <option value="">Todas las categorías</option>
-      <option value="Seguro">Seguro</option>
-      <option value="Competido">Competido</option>
-      <option value="Empate">Empate técnico</option>
-    </select>
-    <span class="count" id="row-count">Mostrando 110 de 110 UPZs</span>
-  </div>
-  <div class="table-wrap">
-    <table id="upz-table">
-      <thead>
-        <tr>
-          <th onclick="sortTable(0)">UPZ</th>
-          <th onclick="sortTable(1)">Nombre</th>
-          <th onclick="sortTable(2)">Localidad</th>
-          <th onclick="sortTable(3)">Votos</th>
-          <th onclick="sortTable(4)">Ganador</th>
-          <th onclick="sortTable(5)">%</th>
-          <th onclick="sortTable(6)">Segundo</th>
-          <th onclick="sortTable(7)">Diferencia</th>
-          <th onclick="sortTable(8)">Margen</th>
-          <th onclick="sortTable(9)">Categoría</th>
-        </tr>
-      </thead>
-      <tbody id="table-body">
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">Comparativo Cepeda 2026 vs Petro 2022 <span class="badge">por localidad</span></div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="comp-stats">
-    <div class="stat-card"><div class="num" id="comp-mejor">-</div><div class="label">Mejor delta (menos peor)</div></div>
-    <div class="stat-card"><div class="num" id="comp-peor">-</div><div class="label">Peor delta (mas negativo)</div></div>
-    <div class="stat-card"><div class="num" id="comp-gana">-</div><div class="label">Localidades donde Cepeda ganó en votos</div></div>
-  </div>
-  <div class="table-wrap" style="max-height:400px">
-    <table id="comp-table">
-      <thead>
-        <tr>
-          <th onclick="sortComp(0)">Localidad</th>
-          <th onclick="sortComp(1)">% Petro 2022</th>
-          <th onclick="sortComp(2)">% Cepeda 2026</th>
-          <th onclick="sortComp(3)">Delta (pp)</th>
-          <th onclick="sortComp(4)">Votos Petro 22</th>
-          <th onclick="sortComp(5)">Votos Cepeda 26</th>
-          <th onclick="sortComp(6)">Situación</th>
-        </tr>
-      </thead>
-      <tbody id="comp-body">
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div style="text-align:center;padding:16px;color:#999;font-size:12px">
-  Generado con datos de la Registradur&iacute;a Nacional (2026) y geograf&iacute;a de IDECA.
-</div>
+<div class="footer">
+  Generado con datos de la Registraduria Nacional (2026) y geografia de IDECA. &middot; Analisis Electoral Bogota 2026
 </div>
 
 <script>
+// ─── DATOS EMBEBIDOS ───
 var tableData = [{"cod": "UPZ85", "nom": "BOSA CENTRAL", "loc": "BOSA", "total": 147589, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 85431, "pct_g": 57.9, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 40681, "diff": 44750, "margen": 30.32, "cat": "Seguro"}, {"cod": "UPZ28", "nom": "EL RINCON", "loc": "SUBA", "total": 120856, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 55868, "pct_g": 46.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 43412, "diff": 12456, "margen": 10.31, "cat": "Competido"}, {"cod": "UPZ71", "nom": "TIBABUYES", "loc": "SUBA", "total": 114757, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 56823, "pct_g": 49.5, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 38374, "diff": 18449, "margen": 16.08, "cat": "Competido"}, {"cod": "UPZ73", "nom": "GARCES NAVAS", "loc": "ENGATIVA", "total": 87152, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 35039, "pct_g": 40.2, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 34045, "diff": 994, "margen": 1.14, "cat": "Empate"}, {"cod": "UPZ13", "nom": "LOS CEDROS", "loc": "USAQUEN", "total": 86499, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 48362, "pct_g": 55.9, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 15532, "diff": 32830, "margen": 37.95, "cat": "Seguro"}, {"cod": "UPZ75", "nom": "FONTIBON", "loc": "FONTIBON", "total": 86182, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 37009, "pct_g": 42.9, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 33092, "diff": 3917, "margen": 4.55, "cat": "Empate"}, {"cod": "UPZ30", "nom": "BOYACA REAL", "loc": "ENGATIVA", "total": 84097, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 34906, "pct_g": 41.5, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 31923, "diff": 2983, "margen": 3.55, "cat": "Empate"}, {"cod": "UPZ27", "nom": "SUBA", "loc": "SUBA", "total": 83383, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 33802, "pct_g": 40.5, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 32618, "diff": 1184, "margen": 1.42, "cat": "Empate"}, {"cod": "UPZ82", "nom": "PATIO BONITO", "loc": "KENNEDY", "total": 79890, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 41596, "pct_g": 52.1, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 26003, "diff": 15593, "margen": 19.52, "cat": "Competido"}, {"cod": "UPZ69", "nom": "ISMAEL PERDOMO", "loc": "CIUDAD BOLIVAR", "total": 72152, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 41846, "pct_g": 58.0, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 19768, "diff": 22078, "margen": 30.6, "cat": "Seguro"}, {"cod": "UPZ47", "nom": "KENNEDY CENTRAL", "loc": "KENNEDY", "total": 71754, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 33146, "pct_g": 46.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 26310, "diff": 6836, "margen": 9.53, "cat": "Competido"}, {"cod": "UPZ42", "nom": "VENECIA", "loc": "TUNJUELITO", "total": 71270, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 34272, "pct_g": 48.1, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 25025, "diff": 9247, "margen": 12.97, "cat": "Competido"}, {"cod": "UPZ24", "nom": "NIZA", "loc": "SUBA", "total": 69090, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 37196, "pct_g": 53.8, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 14025, "diff": 23171, "margen": 33.54, "cat": "Seguro"}, {"cod": "UPZ84", "nom": "BOSA OCCIDENTAL", "loc": "BOSA", "total": 68757, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 37899, "pct_g": 55.1, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 20343, "diff": 17556, "margen": 25.53, "cat": "Seguro"}, {"cod": "UPZ48", "nom": "TIMIZA", "loc": "KENNEDY", "total": 68426, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 32752, "pct_g": 47.9, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 23919, "diff": 8833, "margen": 12.91, "cat": "Competido"}, {"cod": "UPZ57", "nom": "GRAN YOMASA", "loc": "USME", "total": 64481, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 38859, "pct_g": 60.3, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 16371, "diff": 22488, "margen": 34.88, "cat": "Seguro"}, {"cod": "UPZ29", "nom": "MINUTO DE DIOS", "loc": "ENGATIVA", "total": 61722, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 24791, "pct_g": 40.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 24437, "diff": 354, "margen": 0.57, "cat": "Empate"}, {"cod": "UPZ23", "nom": "CASA BLANCA SUBA", "loc": "SUBA", "total": 60454, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 34632, "pct_g": 57.3, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 10005, "diff": 24627, "margen": 40.74, "cat": "Seguro"}, {"cod": "UPZ46", "nom": "CASTILLA", "loc": "KENNEDY", "total": 60428, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 25508, "pct_g": 42.2, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 22886, "diff": 2622, "margen": 4.34, "cat": "Empate"}, {"cod": "UPZ40", "nom": "CIUDAD MONTES", "loc": "PUENTE ARANDA", "total": 58402, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 26120, "pct_g": 44.7, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 20876, "diff": 5244, "margen": 8.98, "cat": "Competido"}, {"cod": "UPZ72", "nom": "BOLIVIA", "loc": "ENGATIVA", "total": 55835, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 23500, "pct_g": 42.1, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 19422, "diff": 4078, "margen": 7.3, "cat": "Competido"}, {"cod": "UPZ39", "nom": "QUIROGA", "loc": "RAFAEL URIBE URIBE", "total": 55753, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 26508, "pct_g": 47.6, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 19876, "diff": 6632, "margen": 11.9, "cat": "Competido"}, {"cod": "UPZ26", "nom": "LAS FERIAS", "loc": "ENGATIVA", "total": 54191, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 22041, "pct_g": 40.7, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 20777, "diff": 1264, "margen": 2.33, "cat": "Empate"}, {"cod": "UPZ67", "nom": "LUCERO", "loc": "CIUDAD BOLIVAR", "total": 53215, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 32977, "pct_g": 62.0, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 13378, "diff": 19599, "margen": 36.83, "cat": "Seguro"}, {"cod": "UPZ74", "nom": "ENGATIVA", "loc": "ENGATIVA", "total": 51903, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 24471, "pct_g": 47.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 18405, "diff": 6066, "margen": 11.69, "cat": "Competido"}, {"cod": "UPZ65", "nom": "ARBORIZADORA", "loc": "CIUDAD BOLIVAR", "total": 51224, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 26998, "pct_g": 52.7, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 15758, "diff": 11240, "margen": 21.94, "cat": "Seguro"}, {"cod": "UPZ34", "nom": "20 DE JULIO", "loc": "SAN CRISTOBAL", "total": 49752, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 27052, "pct_g": 54.4, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 14610, "diff": 12442, "margen": 25.01, "cat": "Seguro"}, {"cod": "UPZ9", "nom": "VERBENAL", "loc": "USAQUEN", "total": 49607, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 20005, "pct_g": 40.3, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 19618, "diff": 387, "margen": 0.78, "cat": "Empate"}, {"cod": "UPZ38", "nom": "RESTREPO", "loc": "ANTONIO NARIÑO", "total": 48512, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 19949, "pct_g": 41.1, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 19544, "diff": 405, "margen": 0.83, "cat": "Empate"}, {"cod": "UPZ66", "nom": "SAN FRANCISCO", "loc": "CIUDAD BOLIVAR", "total": 46150, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 26553, "pct_g": 57.5, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 12766, "diff": 13787, "margen": 29.87, "cat": "Seguro"}, {"cod": "UPZ50", "nom": "LA GLORIA", "loc": "SAN CRISTOBAL", "total": 46055, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 28588, "pct_g": 62.1, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 10668, "diff": 17920, "margen": 38.91, "cat": "Seguro"}, {"cod": "UPZ81", "nom": "GRAN BRITALIA", "loc": "KENNEDY", "total": 44606, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 22981, "pct_g": 51.5, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 14471, "diff": 8510, "margen": 19.08, "cat": "Competido"}, {"cod": "UPZ112", "nom": "GRANJAS DE TECHO", "loc": "FONTIBON", "total": 44066, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 21735, "pct_g": 49.3, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 11776, "diff": 9959, "margen": 22.6, "cat": "Seguro"}, {"cod": "UPZ86", "nom": "EL PORVENIR", "loc": "BOSA", "total": 44028, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 25738, "pct_g": 58.5, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 11880, "diff": 13858, "margen": 31.48, "cat": "Seguro"}, {"cod": "UPZ43", "nom": "SAN RAFAEL", "loc": "PUENTE ARANDA", "total": 43024, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 18854, "pct_g": 43.8, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 15876, "diff": 2978, "margen": 6.92, "cat": "Competido"}, {"cod": "UPZ87", "nom": "TINTAL SUR", "loc": "BOSA", "total": 42399, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 25385, "pct_g": 59.9, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 10656, "diff": 14729, "margen": 34.74, "cat": "Seguro"}, {"cod": "UPZ16", "nom": "SANTA BARBARA", "loc": "USAQUEN", "total": 42049, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 26866, "pct_g": 63.9, "segundo": "PALOMA VALENCIA LASERNA", "votos_s": 8564, "diff": 18302, "margen": 43.53, "cat": "Seguro"}, {"cod": "UPZ45", "nom": "CARVAJAL", "loc": "KENNEDY", "total": 41922, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 18311, "pct_g": 43.7, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 16182, "diff": 2129, "margen": 5.08, "cat": "Competido"}, {"cod": "UPZ58", "nom": "COMUNEROS", "loc": "USME", "total": 41173, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 25504, "pct_g": 61.9, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 10001, "diff": 15503, "margen": 37.65, "cat": "Seguro"}, {"cod": "UPZ44", "nom": "AMERICAS", "loc": "KENNEDY", "total": 41135, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 17859, "pct_g": 43.4, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 14834, "diff": 3025, "margen": 7.35, "cat": "Competido"}, {"cod": "UPZ14", "nom": "USAQUEN", "loc": "USAQUEN", "total": 40813, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 23217, "pct_g": 56.9, "segundo": "PALOMA VALENCIA LASERNA", "votos_s": 7568, "diff": 15649, "margen": 38.34, "cat": "Seguro"}, {"cod": "UPZ97", "nom": "CHICO LAGO", "loc": "CHAPINERO", "total": 39865, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 20777, "pct_g": 52.1, "segundo": "PALOMA VALENCIA LASERNA", "votos_s": 8291, "diff": 12486, "margen": 31.32, "cat": "Seguro"}, {"cod": "UPZ22", "nom": "DOCE DE OCTUBRE", "loc": "BARRIOS UNIDOS", "total": 39649, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 17644, "pct_g": 44.5, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 13441, "diff": 4203, "margen": 10.6, "cat": "Competido"}, {"cod": "UPZ17", "nom": "SAN JOSE DE BAVARIA", "loc": "SUBA", "total": 37740, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 19464, "pct_g": 51.6, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 9403, "diff": 10061, "margen": 26.66, "cat": "Seguro"}, {"cod": "UPZ19", "nom": "EL PRADO", "loc": "SUBA", "total": 37486, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 20443, "pct_g": 54.5, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 7881, "diff": 12562, "margen": 33.51, "cat": "Seguro"}, {"cod": "UPZ10", "nom": "LA URIBE", "loc": "USAQUEN", "total": 36464, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 17454, "pct_g": 47.9, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 10391, "diff": 7063, "margen": 19.37, "cat": "Competido"}, {"cod": "UPZ15", "nom": "COUNTRY CLUB", "loc": "USAQUEN", "total": 35244, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 21202, "pct_g": 60.2, "segundo": "PALOMA VALENCIA LASERNA", "votos_s": 6458, "diff": 14744, "margen": 41.83, "cat": "Seguro"}, {"cod": "UPZ41", "nom": "MUZU", "loc": "PUENTE ARANDA", "total": 35070, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 14804, "pct_g": 42.2, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 13841, "diff": 963, "margen": 2.75, "cat": "Empate"}, {"cod": "UPZ79", "nom": "CALANDAIMA", "loc": "KENNEDY", "total": 34965, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 16991, "pct_g": 48.6, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 11815, "diff": 5176, "margen": 14.8, "cat": "Competido"}, {"cod": "UPZ33", "nom": "SOSIEGO", "loc": "SAN CRISTOBAL", "total": 34865, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 18538, "pct_g": 53.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 10426, "diff": 8112, "margen": 23.27, "cat": "Seguro"}, {"cod": "UPZ54", "nom": "MARRUECOS", "loc": "RAFAEL URIBE URIBE", "total": 33285, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 18344, "pct_g": 55.1, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 9720, "diff": 8624, "margen": 25.91, "cat": "Seguro"}, {"cod": "UPZ102", "nom": "LA SABANA", "loc": "LOS MARTIRES", "total": 30922, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 13660, "pct_g": 44.2, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 12180, "diff": 1480, "margen": 4.79, "cat": "Empate"}, {"cod": "UPZ53", "nom": "MARCO FIDEL SUAREZ", "loc": "RAFAEL URIBE URIBE", "total": 30591, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 17085, "pct_g": 55.8, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 8698, "diff": 8387, "margen": 27.42, "cat": "Seguro"}, {"cod": "UPZ62", "nom": "TUNJUELITO", "loc": "TUNJUELITO", "total": 30518, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 15200, "pct_g": 49.8, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 10485, "diff": 4715, "margen": 15.45, "cat": "Competido"}, {"cod": "UPZ21", "nom": "LOS ANDES", "loc": "BARRIOS UNIDOS", "total": 29902, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 15074, "pct_g": 50.4, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 7672, "diff": 7402, "margen": 24.75, "cat": "Seguro"}, {"cod": "UPZ100", "nom": "GALERIAS", "loc": "TEUSAQUILLO", "total": 29841, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 12170, "pct_g": 40.8, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 11097, "diff": 1073, "margen": 3.6, "cat": "Empate"}, {"cod": "UPZ110", "nom": "CIUDAD SALITRE OCCIDENTAL", "loc": "FONTIBON", "total": 29102, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 14415, "pct_g": 49.5, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 6867, "diff": 7548, "margen": 25.94, "cat": "Seguro"}, {"cod": "UPZ99", "nom": "CHAPINERO", "loc": "CHAPINERO", "total": 28954, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 11383, "pct_g": 39.3, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 9957, "diff": 1426, "margen": 4.93, "cat": "Empate"}, {"cod": "UPZ20", "nom": "LA ALHAMBRA", "loc": "SUBA", "total": 28396, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 16625, "pct_g": 58.6, "segundo": "PALOMA VALENCIA LASERNA", "votos_s": 5010, "diff": 11615, "margen": 40.9, "cat": "Seguro"}, {"cod": "UPZ98", "nom": "LOS ALCAZARES", "loc": "BARRIOS UNIDOS", "total": 28386, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 13035, "pct_g": 45.9, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 9708, "diff": 3327, "margen": 11.72, "cat": "Competido"}, {"cod": "UPZ113", "nom": "BAVARIA", "loc": "KENNEDY", "total": 27537, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 12177, "pct_g": 44.2, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 9193, "diff": 2984, "margen": 10.84, "cat": "Competido"}, {"cod": "UPZ51", "nom": "LOS LIBERTADORES", "loc": "SAN CRISTOBAL", "total": 27222, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 16814, "pct_g": 61.8, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 6320, "diff": 10494, "margen": 38.55, "cat": "Seguro"}, {"cod": "UPZ70", "nom": "JERUSALEM", "loc": "CIUDAD BOLIVAR", "total": 26927, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 16246, "pct_g": 60.3, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 6777, "diff": 9469, "margen": 35.17, "cat": "Seguro"}, {"cod": "UPZ55", "nom": "DIANA TURBAY", "loc": "RAFAEL URIBE URIBE", "total": 26868, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 16074, "pct_g": 59.8, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 6977, "diff": 9097, "margen": 33.86, "cat": "Seguro"}, {"cod": "UPZ18", "nom": "BRITALIA", "loc": "SUBA", "total": 26002, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 13542, "pct_g": 52.1, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 6294, "diff": 7248, "margen": 27.87, "cat": "Seguro"}, {"cod": "UPZ114", "nom": "MODELIA", "loc": "FONTIBON", "total": 25951, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 13289, "pct_g": 51.2, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 6449, "diff": 6840, "margen": 26.36, "cat": "Seguro"}, {"cod": "UPZ31", "nom": "SANTA CECILIA", "loc": "ENGATIVA", "total": 25520, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 11562, "pct_g": 45.3, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 8366, "diff": 3196, "margen": 12.52, "cat": "Competido"}, {"cod": "UPZ94", "nom": "LA CANDELARIA", "loc": "CANDELARIA", "total": 24142, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 13162, "pct_g": 54.5, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 6830, "diff": 6332, "margen": 26.23, "cat": "Seguro"}, {"cod": "UPZ49", "nom": "APOGEO", "loc": "BOSA", "total": 23668, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 11801, "pct_g": 49.9, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 8031, "diff": 3770, "margen": 15.93, "cat": "Competido"}, {"cod": "UPZ36", "nom": "SAN JOSE", "loc": "RAFAEL URIBE URIBE", "total": 23521, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 10770, "pct_g": 45.8, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 8391, "diff": 2379, "margen": 10.11, "cat": "Competido"}, {"cod": "UPZ25", "nom": "LA FLORESTA", "loc": "SUBA", "total": 23238, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 12759, "pct_g": 54.9, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 4450, "diff": 8309, "margen": 35.76, "cat": "Seguro"}, {"cod": "UPZ68", "nom": "EL TESORO", "loc": "CIUDAD BOLIVAR", "total": 23167, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 14590, "pct_g": 63.0, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 5335, "diff": 9255, "margen": 39.95, "cat": "Seguro"}, {"cod": "UPZ56", "nom": "DANUBIO", "loc": "USME", "total": 23019, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 13758, "pct_g": 59.8, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 5896, "diff": 7862, "margen": 34.15, "cat": "Seguro"}, {"cod": "UPZ88", "nom": "EL REFUGIO", "loc": "CHAPINERO", "total": 22760, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 12619, "pct_g": 55.4, "segundo": "PALOMA VALENCIA LASERNA", "votos_s": 6319, "diff": 6300, "margen": 27.68, "cat": "Seguro"}, {"cod": "UPZ32", "nom": "SAN BLAS", "loc": "SAN CRISTOBAL", "total": 22109, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 13168, "pct_g": 59.6, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 5490, "diff": 7678, "margen": 34.73, "cat": "Seguro"}, {"cod": "UPZ101", "nom": "TEUSAQUILLO", "loc": "TEUSAQUILLO", "total": 19700, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 9135, "pct_g": 46.4, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 6369, "diff": 2766, "margen": 14.04, "cat": "Competido"}, {"cod": "UPZ106", "nom": "LA ESMERALDA", "loc": "TEUSAQUILLO", "total": 19661, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 9251, "pct_g": 47.0, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 5535, "diff": 3716, "margen": 18.9, "cat": "Competido"}, {"cod": "UPZ93", "nom": "LAS NIEVES", "loc": "SANTA FE", "total": 18926, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 9732, "pct_g": 51.4, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 5901, "diff": 3831, "margen": 20.24, "cat": "Seguro"}, {"cod": "UPZ11", "nom": "SAN CRISTOBAL NORTE", "loc": "USAQUEN", "total": 18600, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 7689, "pct_g": 41.3, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 7197, "diff": 492, "margen": 2.65, "cat": "Empate"}, {"cod": "UPZ78", "nom": "TINTAL NORTE", "loc": "KENNEDY", "total": 17588, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 7589, "pct_g": 43.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 6670, "diff": 919, "margen": 5.23, "cat": "Competido"}, {"cod": "UPZ37", "nom": "SANTA ISABEL", "loc": "LOS MARTIRES", "total": 17529, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 8163, "pct_g": 46.6, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 6309, "diff": 1854, "margen": 10.58, "cat": "Competido"}, {"cod": "UPZ35", "nom": "CIUDAD JARDIN", "loc": "ANTONIO NARIÑO", "total": 16640, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 7057, "pct_g": 42.4, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 6775, "diff": 282, "margen": 1.69, "cat": "Empate"}, {"cod": "UPZ59", "nom": "ALFONSO LOPEZ", "loc": "USME", "total": 14437, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 9266, "pct_g": 64.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 3320, "diff": 5946, "margen": 41.19, "cat": "Seguro"}, {"cod": "UPZ104", "nom": "PARQUE SIMON BOLIVAR - CAN", "loc": "TEUSAQUILLO", "total": 13154, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 4793, "pct_g": 36.4, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 4785, "diff": 8, "margen": 0.06, "cat": "Empate"}, {"cod": "UPZ90", "nom": "PARDO RUBIO", "loc": "CHAPINERO", "total": 13010, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 4509, "pct_g": 34.7, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 4254, "diff": 255, "margen": 1.96, "cat": "Empate"}, {"cod": "UPZ76", "nom": "FONTIBON SAN PABLO", "loc": "FONTIBON", "total": 12984, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 6795, "pct_g": 52.3, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 4040, "diff": 2755, "margen": 21.22, "cat": "Seguro"}, {"cod": "UPZ107", "nom": "QUINTA PAREDES", "loc": "TEUSAQUILLO", "total": 12753, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 5028, "pct_g": 39.4, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 4611, "diff": 417, "margen": 3.27, "cat": "Empate"}, {"cod": "UPZ96", "nom": "LOURDES", "loc": "SANTA FE", "total": 12625, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 8073, "pct_g": 63.9, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 2631, "diff": 5442, "margen": 43.1, "cat": "Seguro"}, {"cod": "UPZ61", "nom": "CIUDAD USME", "loc": "USME", "total": 12240, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 8005, "pct_g": 65.4, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 2669, "diff": 5336, "margen": 43.59, "cat": "Seguro"}, {"cod": "UPZ116", "nom": "ALAMOS", "loc": "ENGATIVA", "total": 11861, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 4671, "pct_g": 39.4, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 4590, "diff": 81, "margen": 0.68, "cat": "Empate"}, {"cod": "UPZ12", "nom": "TOBERIN", "loc": "USAQUEN", "total": 11442, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 5567, "pct_g": 48.6, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 3200, "diff": 2367, "margen": 20.69, "cat": "Seguro"}, {"cod": "UPZ80", "nom": "CORABASTOS", "loc": "KENNEDY", "total": 10757, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 4787, "pct_g": 44.5, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 4180, "diff": 607, "margen": 5.64, "cat": "Competido"}, {"cod": "UPZ109", "nom": "CIUDAD SALITRE ORIENTAL", "loc": "TEUSAQUILLO", "total": 10485, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 5436, "pct_g": 51.8, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 2122, "diff": 3314, "margen": 31.61, "cat": "Seguro"}, {"cod": "UPZ91", "nom": "SAGRADO CORAZON", "loc": "SANTA FE", "total": 9516, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 4684, "pct_g": 49.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 2599, "diff": 2085, "margen": 21.91, "cat": "Seguro"}, {"cod": "UPZ95", "nom": "LAS CRUCES", "loc": "SANTA FE", "total": 9065, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 5126, "pct_g": 56.6, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 2575, "diff": 2551, "margen": 28.14, "cat": "Seguro"}, {"cod": "UPZ105", "nom": "JARDIN BOTANICO", "loc": "ENGATIVA", "total": 7516, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 3518, "pct_g": 46.8, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 2269, "diff": 1249, "margen": 16.62, "cat": "Competido"}, {"cod": "UPZ111", "nom": "PUENTE ARANDA", "loc": "PUENTE ARANDA", "total": 7069, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 3124, "pct_g": 44.2, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 2709, "diff": 415, "margen": 5.87, "cat": "Competido"}, {"cod": "UPZ83", "nom": "LAS MARGARITAS", "loc": "KENNEDY", "total": 5924, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 3141, "pct_g": 53.0, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 1801, "diff": 1340, "margen": 22.62, "cat": "Seguro"}, {"cod": "UPZ52", "nom": "LA FLORA", "loc": "USME", "total": 5687, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 3659, "pct_g": 64.3, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 1184, "diff": 2475, "margen": 43.52, "cat": "Seguro"}, {"cod": "UPZ108", "nom": "ZONA INDUSTRIAL", "loc": "PUENTE ARANDA", "total": 5581, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 2447, "pct_g": 43.8, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 2255, "diff": 192, "margen": 3.44, "cat": "Empate"}, {"cod": "UPR3", "nom": "UPR RIO TUNJUELO", "loc": "CIUDAD BOLIVAR", "total": 4903, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 3150, "pct_g": 64.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 1121, "diff": 2029, "margen": 41.38, "cat": "Seguro"}, {"cod": "UPZ92", "nom": "LA MACARENA", "loc": "SANTA FE", "total": 4760, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 2601, "pct_g": 54.6, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 1241, "diff": 1360, "margen": 28.57, "cat": "Seguro"}, {"cod": "UPZ89", "nom": "SAN ISIDRO - PATIOS", "loc": "CHAPINERO", "total": 4276, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 2357, "pct_g": 55.1, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 1172, "diff": 1185, "margen": 27.71, "cat": "Seguro"}, {"cod": "UPZ115", "nom": "CAPELLANIA", "loc": "FONTIBON", "total": 3608, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 1449, "pct_g": 40.2, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 1449, "diff": 0, "margen": 0.0, "cat": "Empate"}, {"cod": "UPR1", "nom": "UPR ZONA NORTE", "loc": "SUBA", "total": 3436, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 1629, "pct_g": 47.4, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 1094, "diff": 535, "margen": 15.57, "cat": "Competido"}, {"cod": "UPZ103", "nom": "PARQUE SALITRE", "loc": "BARRIOS UNIDOS", "total": 2739, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 1102, "pct_g": 40.2, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 858, "diff": 244, "margen": 8.91, "cat": "Competido"}, {"cod": "UPZ1", "nom": "PASEO DE LOS LIBERTADORES", "loc": "USAQUEN", "total": 2287, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 1091, "pct_g": 47.7, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 727, "diff": 364, "margen": 15.92, "cat": "Competido"}, {"cod": "UPZ3", "nom": "GUAYMARAL", "loc": "SUBA", "total": 1850, "ganador": "ABELARDO DE LA ESPRIELLA", "votos_g": 1215, "pct_g": 65.7, "segundo": "IVÁN CEPEDA CASTRO", "votos_s": 247, "diff": 968, "margen": 52.32, "cat": "Seguro"}, {"cod": "UPR5", "nom": "UPR RIO SUMAPAZ", "loc": "SUMAPAZ", "total": 1107, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 1080, "pct_g": 97.6, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 14, "diff": 1066, "margen": 96.3, "cat": "Seguro"}, {"cod": "UPR4", "nom": "UPR RIO BLANCO", "loc": "SUMAPAZ", "total": 1052, "ganador": "IVÁN CEPEDA CASTRO", "votos_g": 584, "pct_g": 55.5, "segundo": "ABELARDO DE LA ESPRIELLA", "votos_s": 325, "diff": 259, "margen": 24.62, "cat": "Seguro"}];
+var statsCand = [{"c": "IVÁN CEPEDA CASTRO", "v": 1675622, "p": 42.4}, {"c": "ABELARDO DE LA ESPRIELLA", "v": 1513781, "p": 38.3}, {"c": "PALOMA VALENCIA LASERNA", "v": 367261, "p": 9.3}, {"c": "SERGIO FAJARDO VALDERRAMA", "v": 254941, "p": 6.5}, {"c": "CLAUDIA LÓPEZ", "v": 100795, "p": 2.6}, {"c": "RAÚL SANTIAGO BOTERO JARAMILLO", "v": 21515, "p": 0.5}, {"c": "ÓSCAR MAURICIO LIZCANO ARANGO", "v": 6212, "p": 0.2}, {"c": "MIGUEL URIBE LONDOÑO", "v": 3865, "p": 0.1}, {"c": "SONDRA MACOLLINS GARVIN PINTO", "v": 2536, "p": 0.1}, {"c": "LUIS GILBERTO MURILLO URRUTIA", "v": 2294, "p": 0.1}, {"c": "ROY LEONARDO BARRERAS MONTEALEGRE", "v": 1741, "p": 0.0}, {"c": "CARLOS EDUARDO CAICEDO OMAR", "v": 1134, "p": 0.0}, {"c": "GUSTAVO MATAMOROS CAMACHO", "v": 720, "p": 0.0}];
+var upzDist = [{"upz": "BOSA CENTRAL", "IVÁN CEPEDA CASTRO": 57.9, "ABELARDO DE LA ESPRIELLA": 27.6, "PALOMA VALENCIA LASERNA": 6.1, "SERGIO FAJARDO VALDERRAMA": 4.4, "CLAUDIA LÓPEZ": 2.7, "Otros": 1.4}, {"upz": "EL RINCON", "IVÁN CEPEDA CASTRO": 46.2, "ABELARDO DE LA ESPRIELLA": 35.9, "PALOMA VALENCIA LASERNA": 7.9, "SERGIO FAJARDO VALDERRAMA": 6.1, "CLAUDIA LÓPEZ": 2.7, "Otros": 1.1}, {"upz": "TIBABUYES", "IVÁN CEPEDA CASTRO": 49.5, "ABELARDO DE LA ESPRIELLA": 33.4, "PALOMA VALENCIA LASERNA": 7.2, "SERGIO FAJARDO VALDERRAMA": 5.8, "CLAUDIA LÓPEZ": 2.9, "Otros": 1.1}, {"upz": "GARCES NAVAS", "IVÁN CEPEDA CASTRO": 39.1, "ABELARDO DE LA ESPRIELLA": 40.2, "PALOMA VALENCIA LASERNA": 9.0, "SERGIO FAJARDO VALDERRAMA": 8.1, "CLAUDIA LÓPEZ": 2.7, "Otros": 0.9}, {"upz": "LOS CEDROS", "IVÁN CEPEDA CASTRO": 18.0, "ABELARDO DE LA ESPRIELLA": 55.9, "PALOMA VALENCIA LASERNA": 15.0, "SERGIO FAJARDO VALDERRAMA": 9.3, "CLAUDIA LÓPEZ": 1.5, "Otros": 0.3}, {"upz": "FONTIBON", "IVÁN CEPEDA CASTRO": 42.9, "ABELARDO DE LA ESPRIELLA": 38.4, "PALOMA VALENCIA LASERNA": 8.5, "SERGIO FAJARDO VALDERRAMA": 6.3, "CLAUDIA LÓPEZ": 2.7, "Otros": 1.1}, {"upz": "BOYACA REAL", "IVÁN CEPEDA CASTRO": 38.0, "ABELARDO DE LA ESPRIELLA": 41.5, "PALOMA VALENCIA LASERNA": 9.6, "SERGIO FAJARDO VALDERRAMA": 7.1, "CLAUDIA LÓPEZ": 2.8, "Otros": 1.0}, {"upz": "SUBA", "IVÁN CEPEDA CASTRO": 39.1, "ABELARDO DE LA ESPRIELLA": 40.5, "PALOMA VALENCIA LASERNA": 9.2, "SERGIO FAJARDO VALDERRAMA": 7.6, "CLAUDIA LÓPEZ": 2.7, "Otros": 0.9}, {"upz": "PATIO BONITO", "IVÁN CEPEDA CASTRO": 52.1, "ABELARDO DE LA ESPRIELLA": 32.5, "PALOMA VALENCIA LASERNA": 6.4, "SERGIO FAJARDO VALDERRAMA": 4.4, "CLAUDIA LÓPEZ": 3.1, "Otros": 1.5}, {"upz": "ISMAEL PERDOMO", "IVÁN CEPEDA CASTRO": 58.0, "ABELARDO DE LA ESPRIELLA": 27.4, "PALOMA VALENCIA LASERNA": 6.2, "SERGIO FAJARDO VALDERRAMA": 4.1, "CLAUDIA LÓPEZ": 2.9, "Otros": 1.4}];
+var matrizData = [[0, 0, 41.3], [1, 0, 31.3], [2, 0, 56.2], [3, 0, 54.5], [4, 0, 31.2], [5, 0, 59.7], [6, 0, 37.7], [7, 0, 35.1], [8, 0, 44.8], [9, 0, 37.7], [10, 0, 38.2], [11, 0, 52.8], [12, 0, 58.2], [13, 0, 55.2], [14, 0, 26.7], [15, 0, 76.5], [16, 0, 34.7], [17, 0, 49.0], [18, 0, 24.4], [19, 0, 62.6], [0, 1, 40.9], [1, 1, 45.3], [2, 1, 28.6], [3, 1, 28.3], [4, 1, 40.4], [5, 1, 26.0], [6, 1, 41.2], [7, 1, 43.3], [8, 1, 37.2], [9, 1, 45.4], [10, 1, 43.8], [11, 1, 31.0], [12, 1, 26.1], [13, 1, 26.8], [14, 1, 50.5], [15, 1, 16.1], [16, 1, 40.7], [17, 1, 34.7], [18, 1, 51.4], [19, 1, 23.5], [0, 2, 8.7], [1, 2, 11.4], [2, 2, 6.2], [3, 2, 8.7], [4, 2, 17.6], [5, 2, 5.9], [6, 2, 9.6], [7, 2, 10.2], [8, 2, 7.8], [9, 2, 8.3], [10, 2, 8.1], [11, 2, 7.0], [12, 2, 6.7], [13, 2, 8.4], [14, 2, 12.2], [15, 2, 4.2], [16, 2, 12.8], [17, 2, 7.3], [18, 2, 13.9], [19, 2, 5.6], [0, 3, 6.1], [1, 3, 9.2], [2, 3, 4.5], [3, 3, 4.8], [4, 3, 7.9], [5, 3, 3.6], [6, 3, 8.1], [7, 3, 8.2], [8, 3, 6.3], [9, 3, 5.7], [10, 3, 6.8], [11, 3, 4.9], [12, 3, 4.4], [13, 3, 6.1], [14, 3, 8.1], [15, 3, 1.3], [16, 3, 9.1], [17, 3, 4.9], [18, 3, 7.9], [19, 3, 3.4], [0, 4, 2.0], [1, 4, 2.3], [2, 4, 3.0], [3, 4, 2.4], [4, 4, 2.2], [5, 4, 3.0], [6, 4, 2.6], [7, 4, 2.4], [8, 4, 2.8], [9, 4, 1.9], [10, 4, 2.3], [11, 4, 2.9], [12, 4, 3.2], [13, 4, 2.5], [14, 4, 2.0], [15, 4, 1.0], [16, 4, 2.1], [17, 4, 2.8], [18, 4, 1.7], [19, 4, 3.1], [0, 5, 0.5], [1, 5, 0.3], [2, 5, 0.8], [3, 5, 0.5], [4, 5, 0.3], [5, 5, 1.1], [6, 5, 0.4], [7, 5, 0.4], [8, 5, 0.6], [9, 5, 0.6], [10, 5, 0.5], [11, 5, 0.7], [12, 5, 0.8], [13, 5, 0.5], [14, 5, 0.3], [15, 5, 0.5], [16, 5, 0.3], [17, 5, 0.7], [18, 5, 0.3], [19, 5, 1.1], [0, 6, 0.2], [1, 6, 0.1], [2, 6, 0.2], [3, 6, 0.2], [4, 6, 0.2], [5, 6, 0.2], [6, 6, 0.2], [7, 6, 0.2], [8, 6, 0.2], [9, 6, 0.1], [10, 6, 0.2], [11, 6, 0.2], [12, 6, 0.2], [13, 6, 0.2], [14, 6, 0.1], [15, 6, 0], [16, 6, 0.1], [17, 6, 0.2], [18, 6, 0.1], [19, 6, 0.2], [0, 7, 0.1], [1, 7, 0.1], [2, 7, 0.1], [3, 7, 0.2], [4, 7, 0.1], [5, 7, 0.2], [6, 7, 0.1], [7, 7, 0.1], [8, 7, 0.1], [9, 7, 0.1], [10, 7, 0.1], [11, 7, 0.1], [12, 7, 0.1], [13, 7, 0.1], [14, 7, 0.1], [15, 7, 0.2], [16, 7, 0.1], [17, 7, 0.1], [18, 7, 0.1], [19, 7, 0.2], [0, 8, 0.0], [1, 8, 0.1], [2, 8, 0.1], [3, 8, 0.1], [4, 8, 0.1], [5, 8, 0.1], [6, 8, 0.1], [7, 8, 0.1], [8, 8, 0.1], [9, 8, 0.1], [10, 8, 0.0], [11, 8, 0.1], [12, 8, 0.1], [13, 8, 0.1], [14, 8, 0.1], [15, 8, 0.1], [16, 8, 0.1], [17, 8, 0.1], [18, 8, 0.1], [19, 8, 0.1], [0, 9, 0.0], [1, 9, 0.0], [2, 9, 0.1], [3, 9, 0.1], [4, 9, 0.0], [5, 9, 0.1], [6, 9, 0.1], [7, 9, 0.1], [8, 9, 0.1], [9, 9, 0.1], [10, 9, 0.0], [11, 9, 0.1], [12, 9, 0.1], [13, 9, 0.1], [14, 9, 0.0], [15, 9, 0.3], [16, 9, 0.0], [17, 9, 0.1], [18, 9, 0.0], [19, 9, 0.1], [0, 10, 0.0], [1, 10, 0.0], [2, 10, 0.0], [3, 10, 0.2], [4, 10, 0.1], [5, 10, 0.1], [6, 10, 0.0], [7, 10, 0.0], [8, 10, 0.0], [9, 10, 0.1], [10, 10, 0.0], [11, 10, 0.0], [12, 10, 0.1], [13, 10, 0.1], [14, 10, 0.0], [15, 10, 0.1], [16, 10, 0.0], [17, 10, 0.0], [18, 10, 0.0], [19, 10, 0.1], [0, 11, 0.0], [1, 11, 0.0], [2, 11, 0.0], [3, 11, 0.0], [4, 11, 0.0], [5, 11, 0.0], [6, 11, 0.0], [7, 11, 0.0], [8, 11, 0.0], [9, 11, 0.0], [10, 11, 0.0], [11, 11, 0.1], [12, 11, 0.0], [13, 11, 0.0], [14, 11, 0.0], [15, 11, 0.1], [16, 11, 0.0], [17, 11, 0.0], [18, 11, 0.0], [19, 11, 0.0], [0, 12, 0.0], [1, 12, 0.0], [2, 12, 0.0], [3, 12, 0.0], [4, 12, 0.0], [5, 12, 0.0], [6, 12, 0.0], [7, 12, 0.0], [8, 12, 0.0], [9, 12, 0.0], [10, 12, 0.0], [11, 12, 0.0], [12, 12, 0.0], [13, 12, 0.0], [14, 12, 0.0], [15, 12, 0], [16, 12, 0.0], [17, 12, 0.0], [18, 12, 0.0], [19, 12, 0.0]];
+var locList = ["ANTONIO NARIÑO", "BARRIOS UNIDOS", "BOSA", "CANDELARIA", "CHAPINERO", "CIUDAD BOLIVAR", "ENGATIVA", "FONTIBON", "KENNEDY", "LOS MARTIRES", "PUENTE ARANDA", "RAFAEL URIBE URIBE", "SAN CRISTOBAL", "SANTA FE", "SUBA", "SUMAPAZ", "TEUSAQUILLO", "TUNJUELITO", "USAQUEN", "USME"];
+var candNames = ["IVÁN CEPEDA CASTRO", "ABELARDO DE LA ESPRIELLA", "PALOMA VALENCIA LASERNA", "SERGIO FAJARDO VALDERRAMA", "CLAUDIA LÓPEZ", "RAÚL SANTIAGO BOTERO JARAMILLO", "ÓSCAR MAURICIO LIZCANO ARANGO", "MIGUEL URIBE LONDOÑO", "SONDRA MACOLLINS GARVIN PINTO", "LUIS GILBERTO MURILLO URRUTIA", "ROY LEONARDO BARRERAS MONTEALEGRE", "CARLOS EDUARDO CAICEDO OMAR", "GUSTAVO MATAMOROS CAMACHO"];
+var brechaData = [{"upz": "GUAYMARAL", "cepeda": 13.4, "espriella": 65.7}, {"upz": "SANTA BARBARA", "cepeda": 20.4, "espriella": 63.9}, {"upz": "COUNTRY CLUB", "cepeda": 18.3, "espriella": 60.2}, {"upz": "LA ALHAMBRA", "cepeda": 17.6, "espriella": 58.6}, {"upz": "CASA BLANCA SUBA", "cepeda": 16.5, "espriella": 57.3}, {"upz": "USAQUEN", "cepeda": 18.5, "espriella": 56.9}, {"upz": "LOS CEDROS", "cepeda": 18.0, "espriella": 55.9}, {"upz": "LA FLORESTA", "cepeda": 19.1, "espriella": 54.9}, {"upz": "NIZA", "cepeda": 20.3, "espriella": 53.8}, {"upz": "EL PRADO", "cepeda": 21.0, "espriella": 54.5}, {"upz": "CIUDAD SALITRE ORIENTAL", "cepeda": 20.2, "espriella": 51.8}, {"upz": "CHICO LAGO", "cepeda": 20.8, "espriella": 52.1}, {"upz": "EL PORVENIR", "cepeda": 58.5, "espriella": 27.0}, {"upz": "DIANA TURBAY", "cepeda": 59.8, "espriella": 26.0}, {"upz": "DANUBIO", "cepeda": 59.8, "espriella": 25.6}, {"upz": "TINTAL SUR", "cepeda": 59.9, "espriella": 25.1}, {"upz": "SAN BLAS", "cepeda": 59.6, "espriella": 24.8}, {"upz": "GRAN YOMASA", "cepeda": 60.3, "espriella": 25.4}, {"upz": "JERUSALEM", "cepeda": 60.3, "espriella": 25.2}, {"upz": "LUCERO", "cepeda": 62.0, "espriella": 25.1}, {"upz": "COMUNEROS", "cepeda": 61.9, "espriella": 24.3}, {"upz": "LOS LIBERTADORES", "cepeda": 61.8, "espriella": 23.2}, {"upz": "LA GLORIA", "cepeda": 62.1, "espriella": 23.2}, {"upz": "EL TESORO", "cepeda": 63.0, "espriella": 23.0}, {"upz": "ALFONSO LOPEZ", "cepeda": 64.2, "espriella": 23.0}, {"upz": "UPR RIO TUNJUELO", "cepeda": 64.2, "espriella": 22.9}, {"upz": "LOURDES", "cepeda": 63.9, "espriella": 20.8}, {"upz": "LA FLORA", "cepeda": 64.3, "espriella": 20.8}, {"upz": "CIUDAD USME", "cepeda": 65.4, "espriella": 21.8}, {"upz": "UPR RIO SUMAPAZ", "cepeda": 97.6, "espriella": 1.3}];
+var compData = [{"Localidad": "ANTONIO NARIÑO", "pct_petro_1v22": 0.48, "% Hernández 1v": 0.238, "% Gutiérrez 1v": 0.194, "% Petro 2v": 0.596, "% Hernández 2v": 0.404, "Total válidos 2v": 67846, "pct_cepeda_1v26": 0.408, "% Espriella 26": 0.41, "% Claudia 26": 0.021, "% Paloma 26": 0.09, "% Fajardo 26": 0.061, "delta_petro_1v_pp": -0.07200000000000001, "delta_petro_2v_pp": -0.188, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 32063, "votos_cepeda_1v26": 27241, "delta_petro_1v_pp_pct": -7.2}, {"Localidad": "PUENTE ARANDA", "pct_petro_1v22": 0.441, "% Hernández 1v": 0.255, "% Gutiérrez 1v": 0.203, "% Petro 2v": 0.557, "% Hernández 2v": 0.4429999999999999, "Total válidos 2v": 142540, "pct_cepeda_1v26": 0.3720000000000001, "% Espriella 26": 0.4379999999999999, "% Claudia 26": 0.025, "% Paloma 26": 0.087, "% Fajardo 26": 0.069, "delta_petro_1v_pp": -0.069, "delta_petro_2v_pp": -0.185, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 62359, "votos_cepeda_1v26": 54917, "delta_petro_1v_pp_pct": -6.9}, {"Localidad": "TUNJUELITO", "pct_petro_1v22": 0.5529999999999999, "% Hernández 1v": 0.234, "% Gutiérrez 1v": 0.142, "% Petro 2v": 0.6779999999999999, "% Hernández 2v": 0.322, "Total válidos 2v": 100508, "pct_cepeda_1v26": 0.486, "% Espriella 26": 0.349, "% Claudia 26": 0.028, "% Paloma 26": 0.07400000000000001, "% Fajardo 26": 0.052, "delta_petro_1v_pp": -0.067, "delta_petro_2v_pp": -0.192, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 54025, "votos_cepeda_1v26": 49472, "delta_petro_1v_pp_pct": -6.7}, {"Localidad": "FONTIBON", "pct_petro_1v22": 0.427, "% Hernández 1v": 0.251, "% Gutiérrez 1v": 0.209, "% Petro 2v": 0.555, "% Hernández 2v": 0.445, "Total válidos 2v": 187908, "pct_cepeda_1v26": 0.361, "% Espriella 26": 0.427, "% Claudia 26": 0.025, "% Paloma 26": 0.099, "% Fajardo 26": 0.08, "delta_petro_1v_pp": -0.066, "delta_petro_2v_pp": -0.194, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 81083, "votos_cepeda_1v26": 81092, "delta_petro_1v_pp_pct": -6.6}, {"Localidad": "KENNEDY", "pct_petro_1v22": 0.515, "% Hernández 1v": 0.245, "% Gutiérrez 1v": 0.157, "% Petro 2v": 0.64, "% Hernández 2v": 0.36, "Total válidos 2v": 467547, "pct_cepeda_1v26": 0.452, "% Espriella 26": 0.37, "% Claudia 26": 0.028, "% Paloma 26": 0.077, "% Fajardo 26": 0.062, "delta_petro_1v_pp": -0.063, "delta_petro_2v_pp": -0.188, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 237243, "votos_cepeda_1v26": 228375, "delta_petro_1v_pp_pct": -6.3}, {"Localidad": "ENGATIVÁ", "pct_petro_1v22": 0.451, "% Hernández 1v": 0.244, "% Gutiérrez 1v": 0.198, "% Petro 2v": 0.575, "% Hernández 2v": 0.425, "Total válidos 2v": 405025, "pct_cepeda_1v26": 0.388, "% Espriella 26": 0.405, "% Claudia 26": 0.027, "% Paloma 26": 0.095, "% Fajardo 26": 0.076, "delta_petro_1v_pp": -0.063, "delta_petro_2v_pp": -0.187, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 182779, "votos_cepeda_1v26": 170654, "delta_petro_1v_pp_pct": -6.3}, {"Localidad": "TEUSAQUILLO", "pct_petro_1v22": 0.426, "% Hernández 1v": 0.214, "% Gutiérrez 1v": 0.234, "% Petro 2v": 0.551, "% Hernández 2v": 0.449, "Total válidos 2v": 168110, "pct_cepeda_1v26": 0.363, "% Espriella 26": 0.398, "% Claudia 26": 0.021, "% Paloma 26": 0.123, "% Fajardo 26": 0.08900000000000001, "delta_petro_1v_pp": -0.063, "delta_petro_2v_pp": -0.188, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 69237, "votos_cepeda_1v26": 38358, "delta_petro_1v_pp_pct": -6.3}, {"Localidad": "RAFAEL URIBE URIBE", "pct_petro_1v22": 0.583, "% Hernández 1v": 0.219, "% Gutiérrez 1v": 0.129, "% Petro 2v": 0.71, "% Hernández 2v": 0.29, "Total válidos 2v": 167959, "pct_cepeda_1v26": 0.522, "% Espriella 26": 0.316, "% Claudia 26": 0.029, "% Paloma 26": 0.07, "% Fajardo 26": 0.05, "delta_petro_1v_pp": -0.061, "delta_petro_2v_pp": -0.188, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 94893, "votos_cepeda_1v26": 88781, "delta_petro_1v_pp_pct": -6.1}, {"Localidad": "MÁRTIRES", "pct_petro_1v22": 0.4429999999999999, "% Hernández 1v": 0.266, "% Gutiérrez 1v": 0.21, "% Petro 2v": 0.551, "% Hernández 2v": 0.449, "Total válidos 2v": 48903, "pct_cepeda_1v26": 0.382, "% Espriella 26": 0.45, "% Claudia 26": 0.019, "% Paloma 26": 0.081, "% Fajardo 26": 0.057, "delta_petro_1v_pp": -0.061, "delta_petro_2v_pp": -0.169, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 20941, "votos_cepeda_1v26": 18489, "delta_petro_1v_pp_pct": -6.1}, {"Localidad": "SANTA FE", "pct_petro_1v22": 0.607, "% Hernández 1v": 0.177, "% Gutiérrez 1v": 0.136, "% Petro 2v": 0.725, "% Hernández 2v": 0.275, "Total válidos 2v": 52754, "pct_cepeda_1v26": 0.55, "% Espriella 26": 0.273, "% Claudia 26": 0.024, "% Paloma 26": 0.08199999999999999, "% Fajardo 26": 0.061, "delta_petro_1v_pp": -0.057, "delta_petro_2v_pp": -0.175, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 30652, "votos_cepeda_1v26": 30303, "delta_petro_1v_pp_pct": -5.7}, {"Localidad": "BARRIOS UNIDOS", "pct_petro_1v22": 0.371, "% Hernández 1v": 0.232, "% Gutiérrez 1v": 0.262, "% Petro 2v": 0.488, "% Hernández 2v": 0.512, "Total válidos 2v": 95616, "pct_cepeda_1v26": 0.315, "% Espriella 26": 0.465, "% Claudia 26": 0.023, "% Paloma 26": 0.111, "% Fajardo 26": 0.079, "delta_petro_1v_pp": -0.05599999999999999, "delta_petro_2v_pp": -0.173, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 35529, "votos_cepeda_1v26": 31679, "delta_petro_1v_pp_pct": -5.6}, {"Localidad": "CIUDAD BOLÍVAR", "pct_petro_1v22": 0.639, "% Hernández 1v": 0.211, "% Gutiérrez 1v": 0.094, "% Petro 2v": 0.765, "% Hernández 2v": 0.235, "Total válidos 2v": 262831, "pct_cepeda_1v26": 0.584, "% Espriella 26": 0.27, "% Claudia 26": 0.03, "% Paloma 26": 0.06, "% Fajardo 26": 0.04, "delta_petro_1v_pp": -0.055, "delta_petro_2v_pp": -0.181, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 159924, "votos_cepeda_1v26": 161686, "delta_petro_1v_pp_pct": -5.5}, {"Localidad": "SAN CRISTÓBAL", "pct_petro_1v22": 0.633, "% Hernández 1v": 0.197, "% Gutiérrez 1v": 0.108, "% Petro 2v": 0.76, "% Hernández 2v": 0.24, "Total válidos 2v": 178456, "pct_cepeda_1v26": 0.579, "% Espriella 26": 0.263, "% Claudia 26": 0.031, "% Paloma 26": 0.067, "% Fajardo 26": 0.045, "delta_petro_1v_pp": -0.05400000000000001, "delta_petro_2v_pp": -0.181, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 108195, "votos_cepeda_1v26": 104840, "delta_petro_1v_pp_pct": -5.4}, {"Localidad": "BOSA", "pct_petro_1v22": 0.621, "% Hernández 1v": 0.227, "% Gutiérrez 1v": 0.099, "% Petro 2v": 0.743, "% Hernández 2v": 0.257, "Total válidos 2v": 299878, "pct_cepeda_1v26": 0.5710000000000001, "% Espriella 26": 0.281, "% Claudia 26": 0.029, "% Paloma 26": 0.061, "% Fajardo 26": 0.044, "delta_petro_1v_pp": -0.05, "delta_petro_2v_pp": -0.172, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 178923, "votos_cepeda_1v26": 186254, "delta_petro_1v_pp_pct": -5.0}, {"Localidad": "SUBA", "pct_petro_1v22": 0.384, "% Hernández 1v": 0.232, "% Gutiérrez 1v": 0.26, "% Petro 2v": 0.503, "% Hernández 2v": 0.4970000000000001, "Total válidos 2v": 531598, "pct_cepeda_1v26": 0.334, "% Espriella 26": 0.45, "% Claudia 26": 0.023, "% Paloma 26": 0.108, "% Fajardo 26": 0.077, "delta_petro_1v_pp": -0.05, "delta_petro_2v_pp": -0.169, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 206995, "votos_cepeda_1v26": 202720, "delta_petro_1v_pp_pct": -5.0}, {"Localidad": "USME", "pct_petro_1v22": 0.66, "% Hernández 1v": 0.203, "% Gutiérrez 1v": 0.086, "% Petro 2v": 0.7809999999999999, "% Hernández 2v": 0.219, "Total válidos 2v": 153708, "pct_cepeda_1v26": 0.615, "% Espriella 26": 0.245, "% Claudia 26": 0.03, "% Paloma 26": 0.058, "% Fajardo 26": 0.036, "delta_petro_1v_pp": -0.045, "delta_petro_2v_pp": -0.166, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 96449, "votos_cepeda_1v26": 99725, "delta_petro_1v_pp_pct": -4.5}, {"Localidad": "CHAPINERO", "pct_petro_1v22": 0.298, "% Hernández 1v": 0.145, "% Gutiérrez 1v": 0.386, "% Petro 2v": 0.402, "% Hernández 2v": 0.598, "Total válidos 2v": 96778, "pct_cepeda_1v26": 0.254, "% Espriella 26": 0.448, "% Claudia 26": 0.019, "% Paloma 26": 0.194, "% Fajardo 26": 0.08, "delta_petro_1v_pp": -0.044, "delta_petro_2v_pp": -0.148, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 29796, "votos_cepeda_1v26": 27739, "delta_petro_1v_pp_pct": -4.4}, {"Localidad": "CANDELARIA", "pct_petro_1v22": 0.588, "% Hernández 1v": 0.166, "% Gutiérrez 1v": 0.166, "% Petro 2v": 0.7, "% Hernández 2v": 0.3, "Total válidos 2v": 24181, "pct_cepeda_1v26": 0.545, "% Espriella 26": 0.283, "% Claudia 26": 0.024, "% Paloma 26": 0.087, "% Fajardo 26": 0.048, "delta_petro_1v_pp": -0.043, "delta_petro_2v_pp": -0.155, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 13755, "votos_cepeda_1v26": 13162, "delta_petro_1v_pp_pct": -4.3}, {"Localidad": "USAQUÉN", "pct_petro_1v22": 0.26, "% Hernández 1v": 0.205, "% Gutiérrez 1v": 0.381, "% Petro 2v": 0.364, "% Hernández 2v": 0.636, "Total válidos 2v": 284537, "pct_cepeda_1v26": 0.219, "% Espriella 26": 0.53, "% Claudia 26": 0.017, "% Paloma 26": 0.148, "% Fajardo 26": 0.081, "delta_petro_1v_pp": -0.04099999999999999, "delta_petro_2v_pp": -0.145, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 75751, "votos_cepeda_1v26": 71065, "delta_petro_1v_pp_pct": -4.1}, {"Localidad": "SUMAPAZ", "pct_petro_1v22": 0.8009999999999999, "% Hernández 1v": 0.138, "% Gutiérrez 1v": 0.044, "% Petro 2v": 0.843, "% Hernández 2v": 0.157, "Total válidos 2v": 1870, "pct_cepeda_1v26": 0.7709999999999999, "% Espriella 26": 0.157, "% Claudia 26": 0.01, "% Paloma 26": 0.04099999999999999, "% Fajardo 26": 0.013, "delta_petro_1v_pp": -0.03, "delta_petro_2v_pp": -0.07200000000000001, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🌸 Más votos que Petro 2v", "votos_petro_1v22": 1409, "votos_cepeda_1v26": 1664, "delta_petro_1v_pp_pct": -3.0}];
+var fullComp = [{"loc": "ANTONIO NARIÑO", "Petro 22 vs Cepeda 26_22": 48.0, "Petro 22 vs Cepeda 26_26": 40.8, "Petro 22 vs Cepeda 26_delta": -7.2, "Hernandez 22 vs Espriella 26_22": 23.8, "Hernandez 22 vs Espriella 26_26": 41.0, "Hernandez 22 vs Espriella 26_delta": 17.2, "Gutierrez 22 vs Fajardo 26_22": 19.4, "Gutierrez 22 vs Fajardo 26_26": 6.1, "Gutierrez 22 vs Fajardo 26_delta": -13.3, "Petro 2v 22 vs Cepeda 26_22": 59.6, "Petro 2v 22 vs Cepeda 26_26": 40.8, "Petro 2v 22 vs Cepeda 26_delta": -18.8}, {"loc": "PUENTE ARANDA", "Petro 22 vs Cepeda 26_22": 44.1, "Petro 22 vs Cepeda 26_26": 37.2, "Petro 22 vs Cepeda 26_delta": -6.9, "Hernandez 22 vs Espriella 26_22": 25.5, "Hernandez 22 vs Espriella 26_26": 43.8, "Hernandez 22 vs Espriella 26_delta": 18.3, "Gutierrez 22 vs Fajardo 26_22": 20.3, "Gutierrez 22 vs Fajardo 26_26": 6.9, "Gutierrez 22 vs Fajardo 26_delta": -13.4, "Petro 2v 22 vs Cepeda 26_22": 55.7, "Petro 2v 22 vs Cepeda 26_26": 37.2, "Petro 2v 22 vs Cepeda 26_delta": -18.5}, {"loc": "TUNJUELITO", "Petro 22 vs Cepeda 26_22": 55.3, "Petro 22 vs Cepeda 26_26": 48.6, "Petro 22 vs Cepeda 26_delta": -6.7, "Hernandez 22 vs Espriella 26_22": 23.4, "Hernandez 22 vs Espriella 26_26": 34.9, "Hernandez 22 vs Espriella 26_delta": 11.5, "Gutierrez 22 vs Fajardo 26_22": 14.2, "Gutierrez 22 vs Fajardo 26_26": 5.2, "Gutierrez 22 vs Fajardo 26_delta": -9.0, "Petro 2v 22 vs Cepeda 26_22": 67.8, "Petro 2v 22 vs Cepeda 26_26": 48.6, "Petro 2v 22 vs Cepeda 26_delta": -19.2}, {"loc": "FONTIBON", "Petro 22 vs Cepeda 26_22": 42.7, "Petro 22 vs Cepeda 26_26": 36.1, "Petro 22 vs Cepeda 26_delta": -6.6, "Hernandez 22 vs Espriella 26_22": 25.1, "Hernandez 22 vs Espriella 26_26": 42.7, "Hernandez 22 vs Espriella 26_delta": 17.6, "Gutierrez 22 vs Fajardo 26_22": 20.9, "Gutierrez 22 vs Fajardo 26_26": 8.0, "Gutierrez 22 vs Fajardo 26_delta": -12.9, "Petro 2v 22 vs Cepeda 26_22": 55.5, "Petro 2v 22 vs Cepeda 26_26": 36.1, "Petro 2v 22 vs Cepeda 26_delta": -19.4}, {"loc": "KENNEDY", "Petro 22 vs Cepeda 26_22": 51.5, "Petro 22 vs Cepeda 26_26": 45.2, "Petro 22 vs Cepeda 26_delta": -6.3, "Hernandez 22 vs Espriella 26_22": 24.5, "Hernandez 22 vs Espriella 26_26": 37.0, "Hernandez 22 vs Espriella 26_delta": 12.5, "Gutierrez 22 vs Fajardo 26_22": 15.7, "Gutierrez 22 vs Fajardo 26_26": 6.2, "Gutierrez 22 vs Fajardo 26_delta": -9.5, "Petro 2v 22 vs Cepeda 26_22": 64.0, "Petro 2v 22 vs Cepeda 26_26": 45.2, "Petro 2v 22 vs Cepeda 26_delta": -18.8}, {"loc": "ENGATIVÁ", "Petro 22 vs Cepeda 26_22": 45.1, "Petro 22 vs Cepeda 26_26": 38.8, "Petro 22 vs Cepeda 26_delta": -6.3, "Hernandez 22 vs Espriella 26_22": 24.4, "Hernandez 22 vs Espriella 26_26": 40.5, "Hernandez 22 vs Espriella 26_delta": 16.1, "Gutierrez 22 vs Fajardo 26_22": 19.8, "Gutierrez 22 vs Fajardo 26_26": 7.6, "Gutierrez 22 vs Fajardo 26_delta": -12.2, "Petro 2v 22 vs Cepeda 26_22": 57.5, "Petro 2v 22 vs Cepeda 26_26": 38.8, "Petro 2v 22 vs Cepeda 26_delta": -18.7}, {"loc": "TEUSAQUILLO", "Petro 22 vs Cepeda 26_22": 42.6, "Petro 22 vs Cepeda 26_26": 36.3, "Petro 22 vs Cepeda 26_delta": -6.3, "Hernandez 22 vs Espriella 26_22": 21.4, "Hernandez 22 vs Espriella 26_26": 39.8, "Hernandez 22 vs Espriella 26_delta": 18.4, "Gutierrez 22 vs Fajardo 26_22": 23.4, "Gutierrez 22 vs Fajardo 26_26": 8.9, "Gutierrez 22 vs Fajardo 26_delta": -14.5, "Petro 2v 22 vs Cepeda 26_22": 55.1, "Petro 2v 22 vs Cepeda 26_26": 36.3, "Petro 2v 22 vs Cepeda 26_delta": -18.8}, {"loc": "RAFAEL URIBE URIBE", "Petro 22 vs Cepeda 26_22": 58.3, "Petro 22 vs Cepeda 26_26": 52.2, "Petro 22 vs Cepeda 26_delta": -6.1, "Hernandez 22 vs Espriella 26_22": 21.9, "Hernandez 22 vs Espriella 26_26": 31.6, "Hernandez 22 vs Espriella 26_delta": 9.7, "Gutierrez 22 vs Fajardo 26_22": 12.9, "Gutierrez 22 vs Fajardo 26_26": 5.0, "Gutierrez 22 vs Fajardo 26_delta": -7.9, "Petro 2v 22 vs Cepeda 26_22": 71.0, "Petro 2v 22 vs Cepeda 26_26": 52.2, "Petro 2v 22 vs Cepeda 26_delta": -18.8}, {"loc": "MÁRTIRES", "Petro 22 vs Cepeda 26_22": 44.3, "Petro 22 vs Cepeda 26_26": 38.2, "Petro 22 vs Cepeda 26_delta": -6.1, "Hernandez 22 vs Espriella 26_22": 26.6, "Hernandez 22 vs Espriella 26_26": 45.0, "Hernandez 22 vs Espriella 26_delta": 18.4, "Gutierrez 22 vs Fajardo 26_22": 21.0, "Gutierrez 22 vs Fajardo 26_26": 5.7, "Gutierrez 22 vs Fajardo 26_delta": -15.3, "Petro 2v 22 vs Cepeda 26_22": 55.1, "Petro 2v 22 vs Cepeda 26_26": 38.2, "Petro 2v 22 vs Cepeda 26_delta": -16.9}, {"loc": "SANTA FE", "Petro 22 vs Cepeda 26_22": 60.7, "Petro 22 vs Cepeda 26_26": 55.0, "Petro 22 vs Cepeda 26_delta": -5.7, "Hernandez 22 vs Espriella 26_22": 17.7, "Hernandez 22 vs Espriella 26_26": 27.3, "Hernandez 22 vs Espriella 26_delta": 9.6, "Gutierrez 22 vs Fajardo 26_22": 13.6, "Gutierrez 22 vs Fajardo 26_26": 6.1, "Gutierrez 22 vs Fajardo 26_delta": -7.5, "Petro 2v 22 vs Cepeda 26_22": 72.5, "Petro 2v 22 vs Cepeda 26_26": 55.0, "Petro 2v 22 vs Cepeda 26_delta": -17.5}, {"loc": "BARRIOS UNIDOS", "Petro 22 vs Cepeda 26_22": 37.1, "Petro 22 vs Cepeda 26_26": 31.5, "Petro 22 vs Cepeda 26_delta": -5.6, "Hernandez 22 vs Espriella 26_22": 23.2, "Hernandez 22 vs Espriella 26_26": 46.5, "Hernandez 22 vs Espriella 26_delta": 23.3, "Gutierrez 22 vs Fajardo 26_22": 26.2, "Gutierrez 22 vs Fajardo 26_26": 7.9, "Gutierrez 22 vs Fajardo 26_delta": -18.3, "Petro 2v 22 vs Cepeda 26_22": 48.8, "Petro 2v 22 vs Cepeda 26_26": 31.5, "Petro 2v 22 vs Cepeda 26_delta": -17.3}, {"loc": "CIUDAD BOLÍVAR", "Petro 22 vs Cepeda 26_22": 63.9, "Petro 22 vs Cepeda 26_26": 58.4, "Petro 22 vs Cepeda 26_delta": -5.5, "Hernandez 22 vs Espriella 26_22": 21.1, "Hernandez 22 vs Espriella 26_26": 27.0, "Hernandez 22 vs Espriella 26_delta": 5.9, "Gutierrez 22 vs Fajardo 26_22": 9.4, "Gutierrez 22 vs Fajardo 26_26": 4.0, "Gutierrez 22 vs Fajardo 26_delta": -5.4, "Petro 2v 22 vs Cepeda 26_22": 76.5, "Petro 2v 22 vs Cepeda 26_26": 58.4, "Petro 2v 22 vs Cepeda 26_delta": -18.1}, {"loc": "SAN CRISTÓBAL", "Petro 22 vs Cepeda 26_22": 63.3, "Petro 22 vs Cepeda 26_26": 57.9, "Petro 22 vs Cepeda 26_delta": -5.4, "Hernandez 22 vs Espriella 26_22": 19.7, "Hernandez 22 vs Espriella 26_26": 26.3, "Hernandez 22 vs Espriella 26_delta": 6.6, "Gutierrez 22 vs Fajardo 26_22": 10.8, "Gutierrez 22 vs Fajardo 26_26": 4.5, "Gutierrez 22 vs Fajardo 26_delta": -6.3, "Petro 2v 22 vs Cepeda 26_22": 76.0, "Petro 2v 22 vs Cepeda 26_26": 57.9, "Petro 2v 22 vs Cepeda 26_delta": -18.1}, {"loc": "BOSA", "Petro 22 vs Cepeda 26_22": 62.1, "Petro 22 vs Cepeda 26_26": 57.1, "Petro 22 vs Cepeda 26_delta": -5.0, "Hernandez 22 vs Espriella 26_22": 22.7, "Hernandez 22 vs Espriella 26_26": 28.1, "Hernandez 22 vs Espriella 26_delta": 5.4, "Gutierrez 22 vs Fajardo 26_22": 9.9, "Gutierrez 22 vs Fajardo 26_26": 4.4, "Gutierrez 22 vs Fajardo 26_delta": -5.5, "Petro 2v 22 vs Cepeda 26_22": 74.3, "Petro 2v 22 vs Cepeda 26_26": 57.1, "Petro 2v 22 vs Cepeda 26_delta": -17.2}, {"loc": "SUBA", "Petro 22 vs Cepeda 26_22": 38.4, "Petro 22 vs Cepeda 26_26": 33.4, "Petro 22 vs Cepeda 26_delta": -5.0, "Hernandez 22 vs Espriella 26_22": 23.2, "Hernandez 22 vs Espriella 26_26": 45.0, "Hernandez 22 vs Espriella 26_delta": 21.8, "Gutierrez 22 vs Fajardo 26_22": 26.0, "Gutierrez 22 vs Fajardo 26_26": 7.7, "Gutierrez 22 vs Fajardo 26_delta": -18.3, "Petro 2v 22 vs Cepeda 26_22": 50.3, "Petro 2v 22 vs Cepeda 26_26": 33.4, "Petro 2v 22 vs Cepeda 26_delta": -16.9}, {"loc": "USME", "Petro 22 vs Cepeda 26_22": 66.0, "Petro 22 vs Cepeda 26_26": 61.5, "Petro 22 vs Cepeda 26_delta": -4.5, "Hernandez 22 vs Espriella 26_22": 20.3, "Hernandez 22 vs Espriella 26_26": 24.5, "Hernandez 22 vs Espriella 26_delta": 4.2, "Gutierrez 22 vs Fajardo 26_22": 8.6, "Gutierrez 22 vs Fajardo 26_26": 3.6, "Gutierrez 22 vs Fajardo 26_delta": -5.0, "Petro 2v 22 vs Cepeda 26_22": 78.1, "Petro 2v 22 vs Cepeda 26_26": 61.5, "Petro 2v 22 vs Cepeda 26_delta": -16.6}, {"loc": "CHAPINERO", "Petro 22 vs Cepeda 26_22": 29.8, "Petro 22 vs Cepeda 26_26": 25.4, "Petro 22 vs Cepeda 26_delta": -4.4, "Hernandez 22 vs Espriella 26_22": 14.5, "Hernandez 22 vs Espriella 26_26": 44.8, "Hernandez 22 vs Espriella 26_delta": 30.3, "Gutierrez 22 vs Fajardo 26_22": 38.6, "Gutierrez 22 vs Fajardo 26_26": 8.0, "Gutierrez 22 vs Fajardo 26_delta": -30.6, "Petro 2v 22 vs Cepeda 26_22": 40.2, "Petro 2v 22 vs Cepeda 26_26": 25.4, "Petro 2v 22 vs Cepeda 26_delta": -14.8}, {"loc": "CANDELARIA", "Petro 22 vs Cepeda 26_22": 58.8, "Petro 22 vs Cepeda 26_26": 54.5, "Petro 22 vs Cepeda 26_delta": -4.3, "Hernandez 22 vs Espriella 26_22": 16.6, "Hernandez 22 vs Espriella 26_26": 28.3, "Hernandez 22 vs Espriella 26_delta": 11.7, "Gutierrez 22 vs Fajardo 26_22": 16.6, "Gutierrez 22 vs Fajardo 26_26": 4.8, "Gutierrez 22 vs Fajardo 26_delta": -11.8, "Petro 2v 22 vs Cepeda 26_22": 70.0, "Petro 2v 22 vs Cepeda 26_26": 54.5, "Petro 2v 22 vs Cepeda 26_delta": -15.5}, {"loc": "USAQUÉN", "Petro 22 vs Cepeda 26_22": 26.0, "Petro 22 vs Cepeda 26_26": 21.9, "Petro 22 vs Cepeda 26_delta": -4.1, "Hernandez 22 vs Espriella 26_22": 20.5, "Hernandez 22 vs Espriella 26_26": 53.0, "Hernandez 22 vs Espriella 26_delta": 32.5, "Gutierrez 22 vs Fajardo 26_22": 38.1, "Gutierrez 22 vs Fajardo 26_26": 8.1, "Gutierrez 22 vs Fajardo 26_delta": -30.0, "Petro 2v 22 vs Cepeda 26_22": 36.4, "Petro 2v 22 vs Cepeda 26_26": 21.9, "Petro 2v 22 vs Cepeda 26_delta": -14.5}, {"loc": "SUMAPAZ", "Petro 22 vs Cepeda 26_22": 80.1, "Petro 22 vs Cepeda 26_26": 77.1, "Petro 22 vs Cepeda 26_delta": -3.0, "Hernandez 22 vs Espriella 26_22": 13.8, "Hernandez 22 vs Espriella 26_26": 15.7, "Hernandez 22 vs Espriella 26_delta": 1.9, "Gutierrez 22 vs Fajardo 26_22": 4.4, "Gutierrez 22 vs Fajardo 26_26": 1.3, "Gutierrez 22 vs Fajardo 26_delta": -3.1, "Petro 2v 22 vs Cepeda 26_22": 84.3, "Petro 2v 22 vs Cepeda 26_26": 77.1, "Petro 2v 22 vs Cepeda 26_delta": -7.2}];
+var compPairs = ["Petro 22 vs Cepeda 26", "Hernandez 22 vs Espriella 26", "Gutierrez 22 vs Fajardo 26", "Petro 2v 22 vs Cepeda 26"];
+var scatterData = [[48.0, 40.8, -7.2, "ANTONIO NARI\u00d1O"], [44.1, 37.2, -6.9, "PUENTE ARANDA"], [55.3, 48.6, -6.7, "TUNJUELITO"], [42.7, 36.1, -6.6, "FONTIBON"], [51.5, 45.2, -6.3, "KENNEDY"], [45.1, 38.8, -6.3, "ENGATIV\u00c1"], [42.6, 36.3, -6.3, "TEUSAQUILLO"], [58.3, 52.2, -6.1, "RAFAEL URIBE URIBE"], [44.3, 38.2, -6.1, "M\u00c1RTIRES"], [60.7, 55.0, -5.7, "SANTA FE"], [37.1, 31.5, -5.6, "BARRIOS UNIDOS"], [63.9, 58.4, -5.5, "CIUDAD BOL\u00cdVAR"], [63.3, 57.9, -5.4, "SAN CRIST\u00d3BAL"], [62.1, 57.1, -5.0, "BOSA"], [38.4, 33.4, -5.0, "SUBA"], [66.0, 61.5, -4.5, "USME"], [29.8, 25.4, -4.4, "CHAPINERO"], [58.8, 54.5, -4.3, "CANDELARIA"], [26.0, 21.9, -4.1, "USAQU\u00c9N"], [80.1, 77.1, -3.0, "SUMAPAZ"]];
+var dualData = [{"loc": "ANTONIO NARIÑO", "petro": 48.0, "cepeda": 40.8, "delta": -7.2}, {"loc": "PUENTE ARANDA", "petro": 44.1, "cepeda": 37.2, "delta": -6.9}, {"loc": "TUNJUELITO", "petro": 55.3, "cepeda": 48.6, "delta": -6.7}, {"loc": "FONTIBON", "petro": 42.7, "cepeda": 36.1, "delta": -6.6}, {"loc": "KENNEDY", "petro": 51.5, "cepeda": 45.2, "delta": -6.3}, {"loc": "ENGATIVÁ", "petro": 45.1, "cepeda": 38.8, "delta": -6.3}, {"loc": "TEUSAQUILLO", "petro": 42.6, "cepeda": 36.3, "delta": -6.3}, {"loc": "RAFAEL URIBE URIBE", "petro": 58.3, "cepeda": 52.2, "delta": -6.1}, {"loc": "MÁRTIRES", "petro": 44.3, "cepeda": 38.2, "delta": -6.1}, {"loc": "SANTA FE", "petro": 60.7, "cepeda": 55.0, "delta": -5.7}, {"loc": "BARRIOS UNIDOS", "petro": 37.1, "cepeda": 31.5, "delta": -5.6}, {"loc": "CIUDAD BOLÍVAR", "petro": 63.9, "cepeda": 58.4, "delta": -5.5}, {"loc": "SAN CRISTÓBAL", "petro": 63.3, "cepeda": 57.9, "delta": -5.4}, {"loc": "BOSA", "petro": 62.1, "cepeda": 57.1, "delta": -5.0}, {"loc": "SUBA", "petro": 38.4, "cepeda": 33.4, "delta": -5.0}, {"loc": "USME", "petro": 66.0, "cepeda": 61.5, "delta": -4.5}, {"loc": "CHAPINERO", "petro": 29.8, "cepeda": 25.4, "delta": -4.4}, {"loc": "CANDELARIA", "petro": 58.8, "cepeda": 54.5, "delta": -4.3}, {"loc": "USAQUÉN", "petro": 26.0, "cepeda": 21.9, "delta": -4.1}, {"loc": "SUMAPAZ", "petro": 80.1, "cepeda": 77.1, "delta": -3.0}];
+var candColors = {"IVÁN CEPEDA CASTRO": "#E53935", "ABELARDO DE LA ESPRIELLA": "#1E88E5", "PALOMA VALENCIA LASERNA": "#43A047", "SERGIO FAJARDO VALDERRAMA": "#8E24AA", "CLAUDIA LÓPEZ": "#FB8C00", "RAÚL SANTIAGO BOTERO JARAMILLO": "#FDD835", "ÓSCAR MAURICIO LIZCANO ARANGO": "#6D4C41", "MIGUEL URIBE LONDOÑO": "#D81B60", "SONDRA MACOLLINS GARVIN PINTO": "#757575", "LUIS GILBERTO MURILLO URRUTIA": "#00ACC1", "ROY LEONARDO BARRERAS MONTEALEGRE": "#FFB300", "CARLOS EDUARDO CAICEDO OMAR": "#795548", "GUSTAVO MATAMOROS CAMACHO": "#00897B"};
+
+// ─── TABLA UPZ ───
 var sortCol = -1;
 var sortAsc = true;
-
 function renderTable(data) {
   var tbody = document.getElementById('table-body');
   tbody.innerHTML = data.map(function(r) {
-    var barW = Math.min(r.margen * 3, 100);
+    var catClass = 'badge badge-' + (r.cat === 'Seguro' ? 'success' : r.cat === 'Competido' ? 'warning' : 'error');
     return '<tr>' +
-      '<td>' + r.cod + '</td>' +
+      '<td style="font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;font-size:12px;color:#616161">' + r.cod + '</td>' +
       '<td><strong>' + r.nom + '</strong></td>' +
       '<td>' + r.loc + '</td>' +
-      '<td style="text-align:right">' + r.total.toLocaleString() + '</td>' +
-      '<td class="winner-cell">' + r.ganador + '</td>' +
-      '<td style="text-align:right">' + r.pct_g + '%</td>' +
+      '<td style="text-align:right;font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">' + r.total.toLocaleString() + '</td>' +
+      '<td><span style="display:inline-block;width:10px;height:10px;border-radius:2px;' +
+        'background:' + (candColors[r.ganador] || '#ccc') + ';margin-right:6px"></span>' + r.ganador + '</td>' +
+      '<td style="text-align:right;font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">' + r.pct_g + '%</td>' +
       '<td>' + r.segundo + '</td>' +
-      '<td style="text-align:right">' + r.diff.toLocaleString() + '</td>' +
-      '<td style="text-align:right">' + r.margen.toFixed(1) + '%</td>' +
-      '<td class="cat-' + r.cat + '">' + r.cat + '</td>' +
+      '<td style="text-align:right;font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">' + r.diff.toLocaleString() + '</td>' +
+      '<td style="text-align:right;font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">' + r.margen.toFixed(1) + '%' +
+        '<div style="height:4px;border-radius:2px;background:#F0F0F0;margin-top:4px;overflow:hidden">' +
+        '<div style="height:100%;width:' + Math.min(r.margen * 3, 100) + '%;background:#B71C1C;border-radius:2px"></div></div></td>' +
+      '<td><span class="' + catClass + '">' + r.cat + '</span></td>' +
       '</tr>';
   }).join('');
-  document.getElementById('row-count').textContent = 'Mostrando ' + data.length + ' de ' + tableData.length + ' UPZs';
+  document.getElementById('row-count').textContent = data.length + ' de ' + tableData.length + ' UPZs';
 }
-
 function filterTable() {
   var q = document.getElementById('search-input').value.toLowerCase();
   var loc = document.getElementById('loc-filter').value;
   var cat = document.getElementById('cat-filter').value;
-  var filtered = tableData.filter(function(r) {
-    var matchName = r.nom.toLowerCase().indexOf(q) >= 0 || r.cod.toLowerCase().indexOf(q) >= 0;
-    var matchLoc = !loc || r.loc === loc;
-    var matchCat = !cat || r.cat === cat;
-    return matchName && matchLoc && matchCat;
-  });
-  renderTable(filtered);
+  renderTable(tableData.filter(function(r) {
+    return (!q || r.nom.toLowerCase().indexOf(q) >= 0 || r.cod.toLowerCase().indexOf(q) >= 0) &&
+           (!loc || r.loc === loc) &&
+           (!cat || r.cat === cat);
+  }));
 }
-
 function sortTable(col) {
-  if (sortCol === col) { sortAsc = !sortAsc; } else { sortCol = col; sortAsc = true; }
+  sortAsc = sortCol === col ? !sortAsc : true; sortCol = col;
   var keys = ['cod', 'nom', 'loc', 'total', 'ganador', 'pct_g', 'segundo', 'diff', 'margen', 'cat'];
   var key = keys[col];
   tableData.sort(function(a, b) {
     var va = a[key], vb = b[key];
-    if (typeof va === 'number') { return sortAsc ? va - vb : vb - va; }
+    if (typeof va === 'number') return sortAsc ? va - vb : vb - va;
     return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  });
+  // Update sort arrows
+  document.querySelectorAll('#upz-table th').forEach(function(th, i) {
+    th.classList.toggle('sort-asc', i === col && sortAsc);
+    th.classList.toggle('sort-desc', i === col && !sortAsc);
   });
   filterTable();
 }
-
-// Initial render
 renderTable(tableData);
 
-// ─── COMPARATIVO ───
-var compData = [{"Localidad": "ANTONIO NARIÑO", "pct_petro_1v22": 0.48, "% Hernández 1v": 0.238, "% Gutiérrez 1v": 0.194, "% Petro 2v": 0.596, "% Hernández 2v": 0.404, "Total válidos 2v": 67846, "pct_cepeda_1v26": 0.408, "% Espriella 26": 0.41, "% Claudia 26": 0.021, "% Paloma 26": 0.09, "% Fajardo 26": 0.061, "delta_petro_1v_pp": -0.07200000000000001, "delta_petro_2v_pp": -0.188, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 32063, "votos_cepeda_1v26": 27241, "delta_petro_1v_pp_pct": -7.2}, {"Localidad": "PUENTE ARANDA", "pct_petro_1v22": 0.441, "% Hernández 1v": 0.255, "% Gutiérrez 1v": 0.203, "% Petro 2v": 0.557, "% Hernández 2v": 0.4429999999999999, "Total válidos 2v": 142540, "pct_cepeda_1v26": 0.3720000000000001, "% Espriella 26": 0.4379999999999999, "% Claudia 26": 0.025, "% Paloma 26": 0.087, "% Fajardo 26": 0.069, "delta_petro_1v_pp": -0.069, "delta_petro_2v_pp": -0.185, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 62359, "votos_cepeda_1v26": 54917, "delta_petro_1v_pp_pct": -6.9}, {"Localidad": "TUNJUELITO", "pct_petro_1v22": 0.5529999999999999, "% Hernández 1v": 0.234, "% Gutiérrez 1v": 0.142, "% Petro 2v": 0.6779999999999999, "% Hernández 2v": 0.322, "Total válidos 2v": 100508, "pct_cepeda_1v26": 0.486, "% Espriella 26": 0.349, "% Claudia 26": 0.028, "% Paloma 26": 0.07400000000000001, "% Fajardo 26": 0.052, "delta_petro_1v_pp": -0.067, "delta_petro_2v_pp": -0.192, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 54025, "votos_cepeda_1v26": 49472, "delta_petro_1v_pp_pct": -6.7}, {"Localidad": "FONTIBON", "pct_petro_1v22": 0.427, "% Hernández 1v": 0.251, "% Gutiérrez 1v": 0.209, "% Petro 2v": 0.555, "% Hernández 2v": 0.445, "Total válidos 2v": 187908, "pct_cepeda_1v26": 0.361, "% Espriella 26": 0.427, "% Claudia 26": 0.025, "% Paloma 26": 0.099, "% Fajardo 26": 0.08, "delta_petro_1v_pp": -0.066, "delta_petro_2v_pp": -0.194, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 81083, "votos_cepeda_1v26": 81092, "delta_petro_1v_pp_pct": -6.6}, {"Localidad": "KENNEDY", "pct_petro_1v22": 0.515, "% Hernández 1v": 0.245, "% Gutiérrez 1v": 0.157, "% Petro 2v": 0.64, "% Hernández 2v": 0.36, "Total válidos 2v": 467547, "pct_cepeda_1v26": 0.452, "% Espriella 26": 0.37, "% Claudia 26": 0.028, "% Paloma 26": 0.077, "% Fajardo 26": 0.062, "delta_petro_1v_pp": -0.063, "delta_petro_2v_pp": -0.188, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 237243, "votos_cepeda_1v26": 228375, "delta_petro_1v_pp_pct": -6.3}, {"Localidad": "ENGATIVÁ", "pct_petro_1v22": 0.451, "% Hernández 1v": 0.244, "% Gutiérrez 1v": 0.198, "% Petro 2v": 0.575, "% Hernández 2v": 0.425, "Total válidos 2v": 405025, "pct_cepeda_1v26": 0.388, "% Espriella 26": 0.405, "% Claudia 26": 0.027, "% Paloma 26": 0.095, "% Fajardo 26": 0.076, "delta_petro_1v_pp": -0.063, "delta_petro_2v_pp": -0.187, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 182779, "votos_cepeda_1v26": 170654, "delta_petro_1v_pp_pct": -6.3}, {"Localidad": "TEUSAQUILLO", "pct_petro_1v22": 0.426, "% Hernández 1v": 0.214, "% Gutiérrez 1v": 0.234, "% Petro 2v": 0.551, "% Hernández 2v": 0.449, "Total válidos 2v": 168110, "pct_cepeda_1v26": 0.363, "% Espriella 26": 0.398, "% Claudia 26": 0.021, "% Paloma 26": 0.123, "% Fajardo 26": 0.08900000000000001, "delta_petro_1v_pp": -0.063, "delta_petro_2v_pp": -0.188, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 69237, "votos_cepeda_1v26": 38358, "delta_petro_1v_pp_pct": -6.3}, {"Localidad": "RAFAEL URIBE URIBE", "pct_petro_1v22": 0.583, "% Hernández 1v": 0.219, "% Gutiérrez 1v": 0.129, "% Petro 2v": 0.71, "% Hernández 2v": 0.29, "Total válidos 2v": 167959, "pct_cepeda_1v26": 0.522, "% Espriella 26": 0.316, "% Claudia 26": 0.029, "% Paloma 26": 0.07, "% Fajardo 26": 0.05, "delta_petro_1v_pp": -0.061, "delta_petro_2v_pp": -0.188, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 94893, "votos_cepeda_1v26": 88781, "delta_petro_1v_pp_pct": -6.1}, {"Localidad": "MÁRTIRES", "pct_petro_1v22": 0.4429999999999999, "% Hernández 1v": 0.266, "% Gutiérrez 1v": 0.21, "% Petro 2v": 0.551, "% Hernández 2v": 0.449, "Total válidos 2v": 48903, "pct_cepeda_1v26": 0.382, "% Espriella 26": 0.45, "% Claudia 26": 0.019, "% Paloma 26": 0.081, "% Fajardo 26": 0.057, "delta_petro_1v_pp": -0.061, "delta_petro_2v_pp": -0.169, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 20941, "votos_cepeda_1v26": 18489, "delta_petro_1v_pp_pct": -6.1}, {"Localidad": "SANTA FE", "pct_petro_1v22": 0.607, "% Hernández 1v": 0.177, "% Gutiérrez 1v": 0.136, "% Petro 2v": 0.725, "% Hernández 2v": 0.275, "Total válidos 2v": 52754, "pct_cepeda_1v26": 0.55, "% Espriella 26": 0.273, "% Claudia 26": 0.024, "% Paloma 26": 0.08199999999999999, "% Fajardo 26": 0.061, "delta_petro_1v_pp": -0.057, "delta_petro_2v_pp": -0.175, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 30652, "votos_cepeda_1v26": 30303, "delta_petro_1v_pp_pct": -5.7}, {"Localidad": "BARRIOS UNIDOS", "pct_petro_1v22": 0.371, "% Hernández 1v": 0.232, "% Gutiérrez 1v": 0.262, "% Petro 2v": 0.488, "% Hernández 2v": 0.512, "Total válidos 2v": 95616, "pct_cepeda_1v26": 0.315, "% Espriella 26": 0.465, "% Claudia 26": 0.023, "% Paloma 26": 0.111, "% Fajardo 26": 0.079, "delta_petro_1v_pp": -0.05599999999999999, "delta_petro_2v_pp": -0.173, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 35529, "votos_cepeda_1v26": 31679, "delta_petro_1v_pp_pct": -5.6}, {"Localidad": "CIUDAD BOLÍVAR", "pct_petro_1v22": 0.639, "% Hernández 1v": 0.211, "% Gutiérrez 1v": 0.094, "% Petro 2v": 0.765, "% Hernández 2v": 0.235, "Total válidos 2v": 262831, "pct_cepeda_1v26": 0.584, "% Espriella 26": 0.27, "% Claudia 26": 0.03, "% Paloma 26": 0.06, "% Fajardo 26": 0.04, "delta_petro_1v_pp": -0.055, "delta_petro_2v_pp": -0.181, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 159924, "votos_cepeda_1v26": 161686, "delta_petro_1v_pp_pct": -5.5}, {"Localidad": "SAN CRISTÓBAL", "pct_petro_1v22": 0.633, "% Hernández 1v": 0.197, "% Gutiérrez 1v": 0.108, "% Petro 2v": 0.76, "% Hernández 2v": 0.24, "Total válidos 2v": 178456, "pct_cepeda_1v26": 0.579, "% Espriella 26": 0.263, "% Claudia 26": 0.031, "% Paloma 26": 0.067, "% Fajardo 26": 0.045, "delta_petro_1v_pp": -0.05400000000000001, "delta_petro_2v_pp": -0.181, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 108195, "votos_cepeda_1v26": 104840, "delta_petro_1v_pp_pct": -5.4}, {"Localidad": "BOSA", "pct_petro_1v22": 0.621, "% Hernández 1v": 0.227, "% Gutiérrez 1v": 0.099, "% Petro 2v": 0.743, "% Hernández 2v": 0.257, "Total válidos 2v": 299878, "pct_cepeda_1v26": 0.5710000000000001, "% Espriella 26": 0.281, "% Claudia 26": 0.029, "% Paloma 26": 0.061, "% Fajardo 26": 0.044, "delta_petro_1v_pp": -0.05, "delta_petro_2v_pp": -0.172, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 178923, "votos_cepeda_1v26": 186254, "delta_petro_1v_pp_pct": -5.0}, {"Localidad": "SUBA", "pct_petro_1v22": 0.384, "% Hernández 1v": 0.232, "% Gutiérrez 1v": 0.26, "% Petro 2v": 0.503, "% Hernández 2v": 0.4970000000000001, "Total válidos 2v": 531598, "pct_cepeda_1v26": 0.334, "% Espriella 26": 0.45, "% Claudia 26": 0.023, "% Paloma 26": 0.108, "% Fajardo 26": 0.077, "delta_petro_1v_pp": -0.05, "delta_petro_2v_pp": -0.169, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 206995, "votos_cepeda_1v26": 202720, "delta_petro_1v_pp_pct": -5.0}, {"Localidad": "USME", "pct_petro_1v22": 0.66, "% Hernández 1v": 0.203, "% Gutiérrez 1v": 0.086, "% Petro 2v": 0.7809999999999999, "% Hernández 2v": 0.219, "Total válidos 2v": 153708, "pct_cepeda_1v26": 0.615, "% Espriella 26": 0.245, "% Claudia 26": 0.03, "% Paloma 26": 0.058, "% Fajardo 26": 0.036, "delta_petro_1v_pp": -0.045, "delta_petro_2v_pp": -0.166, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 96449, "votos_cepeda_1v26": 99725, "delta_petro_1v_pp_pct": -4.5}, {"Localidad": "CHAPINERO", "pct_petro_1v22": 0.298, "% Hernández 1v": 0.145, "% Gutiérrez 1v": 0.386, "% Petro 2v": 0.402, "% Hernández 2v": 0.598, "Total válidos 2v": 96778, "pct_cepeda_1v26": 0.254, "% Espriella 26": 0.448, "% Claudia 26": 0.019, "% Paloma 26": 0.194, "% Fajardo 26": 0.08, "delta_petro_1v_pp": -0.044, "delta_petro_2v_pp": -0.148, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 29796, "votos_cepeda_1v26": 27739, "delta_petro_1v_pp_pct": -4.4}, {"Localidad": "CANDELARIA", "pct_petro_1v22": 0.588, "% Hernández 1v": 0.166, "% Gutiérrez 1v": 0.166, "% Petro 2v": 0.7, "% Hernández 2v": 0.3, "Total válidos 2v": 24181, "pct_cepeda_1v26": 0.545, "% Espriella 26": 0.283, "% Claudia 26": 0.024, "% Paloma 26": 0.087, "% Fajardo 26": 0.048, "delta_petro_1v_pp": -0.043, "delta_petro_2v_pp": -0.155, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 13755, "votos_cepeda_1v26": 13162, "delta_petro_1v_pp_pct": -4.3}, {"Localidad": "USAQUÉN", "pct_petro_1v22": 0.26, "% Hernández 1v": 0.205, "% Gutiérrez 1v": 0.381, "% Petro 2v": 0.364, "% Hernández 2v": 0.636, "Total válidos 2v": 284537, "pct_cepeda_1v26": 0.219, "% Espriella 26": 0.53, "% Claudia 26": 0.017, "% Paloma 26": 0.148, "% Fajardo 26": 0.081, "delta_petro_1v_pp": -0.04099999999999999, "delta_petro_2v_pp": -0.145, "sit_vs_1v22": "🔴 Menos votos que Petro 1v", "sit_vs_2v22": "🔴 Menos votos que Petro 2v", "votos_petro_1v22": 75751, "votos_cepeda_1v26": 71065, "delta_petro_1v_pp_pct": -4.1}, {"Localidad": "SUMAPAZ", "pct_petro_1v22": 0.8009999999999999, "% Hernández 1v": 0.138, "% Gutiérrez 1v": 0.044, "% Petro 2v": 0.843, "% Hernández 2v": 0.157, "Total válidos 2v": 1870, "pct_cepeda_1v26": 0.7709999999999999, "% Espriella 26": 0.157, "% Claudia 26": 0.01, "% Paloma 26": 0.04099999999999999, "% Fajardo 26": 0.013, "delta_petro_1v_pp": -0.03, "delta_petro_2v_pp": -0.07200000000000001, "sit_vs_1v22": "🌸 Más votos que Petro 1v", "sit_vs_2v22": "🌸 Más votos que Petro 2v", "votos_petro_1v22": 1409, "votos_cepeda_1v26": 1664, "delta_petro_1v_pp_pct": -3.0}];
+// ─── TABLA COMPARATIVA (multi-par) ───
+var compPairIdx = 0;
+
+function getCompPrefix(idx) {
+  return compPairs[idx].replace(/[^a-z0-9]/gi, '_').replace(/vs/g, 'vs') + '_';
+}
 
 function renderComp() {
   var tbody = document.getElementById('comp-body');
-  tbody.innerHTML = compData.map(function(r) {
-    var d = r.delta_petro_1v_pp_pct;
-    var color = d > -4 ? '#d32f2f' : d > -5.5 ? '#e57373' : '#ffcdd2';
-    var sit = (r.sit_vs_1v22 || '').includes('GANA') ? '🌸 Gana en votos' : '🔴 Pierde en votos';
+  var prefix = getCompPrefix(compPairIdx);
+  var pairLabel = compPairs[compPairIdx];
+  document.getElementById('comp-pair-badge').textContent = pairLabel;
+  document.getElementById('comp-th22').textContent = '% 2022 (' + pairLabel.split(' vs ')[0] + ')';
+  document.getElementById('comp-th26').textContent = '% 2026 (' + pairLabel.split(' vs ')[1] + ')';
+
+  var data = fullComp.map(function(r) {
+    var d = r[prefix + 'delta'] || 0;
+    return {
+      loc: r.loc,
+      pct22: r[prefix + '22'] || 0,
+      pct26: r[prefix + '26'] || 0,
+      delta: d,
+      sit: d > 0 ? 'Mejora' : 'Retrocede'
+    };
+  });
+
+  // Calculate max abs delta for bar scaling
+  var maxDelta = Math.max(0.1, Math.max.apply(null, data.map(function(d) { return Math.abs(d.delta); })));
+
+  tbody.innerHTML = data.map(function(r) {
+    var barPct = Math.min(Math.abs(r.delta) / maxDelta * 100, 100);
+    var barColor = r.delta > 0 ? '#2E7D32' : '#C62828';
     return '<tr>' +
-      '<td><strong>' + r.Localidad + '</strong></td>' +
-      '<td>' + (r.pct_petro_1v22 !== undefined ? (r.pct_petro_1v22 * 100).toFixed(1) + '%' : '-') + '</td>' +
-      '<td>' + (r.pct_cepeda_1v26 !== undefined ? (r.pct_cepeda_1v26 * 100).toFixed(1) + '%' : '-') + '</td>' +
-      '<td style="font-weight:600;color:' + color + '">' + (d > 0 ? '+' : '') + d.toFixed(1) + ' pp</td>' +
-      '<td style="text-align:right">' + Number(r.votos_petro_1v22).toLocaleString() + '</td>' +
-      '<td style="text-align:right">' + Number(r.votos_cepeda_1v26).toLocaleString() + '</td>' +
-      '<td>' + sit + '</td>' +
+      '<td><strong>' + r.loc + '</strong></td>' +
+      '<td style="text-align:right;font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">' + r.pct22.toFixed(1) + '%</td>' +
+      '<td style="text-align:right;font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">' + r.pct26.toFixed(1) + '%</td>' +
+      '<td style="font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="font-weight:600;color:' + barColor + ';min-width:45px">' + (r.delta > 0 ? '+' : '') + r.delta.toFixed(1) + ' pp</span>' +
+        '<div style="flex:1;height:8px;border-radius:4px;background:#F0F0F0;overflow:hidden">' +
+        '<div style="height:100%;width:' + barPct + '%;background:' + barColor + ';border-radius:4px;transition:width 0.5s"></div></div></div></td>' +
+      '<td style="text-align:right;font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">-</td>' +
+      '<td style="text-align:right;font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace">-</td>' +
+      '<td><span style="color:' + barColor + ';font-weight:500">' + r.sit + '</span></td>' +
       '</tr>';
   }).join('');
+
+  // Update stats
+  var sorted = data.slice().sort(function(a, b) { return b.delta - a.delta; });
+  var mejor = sorted[0], peor = sorted[sorted.length - 1];
+  document.getElementById('comp-mejor').textContent = mejor.loc + ' (' + (mejor.delta > 0 ? '+' : '') + mejor.delta.toFixed(1) + ' pp)';
+  document.getElementById('comp-peor').textContent = peor.loc + ' (' + (peor.delta > 0 ? '+' : '') + peor.delta.toFixed(1) + ' pp)';
+  document.getElementById('comp-pct22').textContent = data.reduce(function(s, r) { return s + r.pct22; }, 0) / data.length + '%';
+  document.getElementById('comp-pct26').textContent = data.reduce(function(s, r) { return s + r.pct26; }, 0) / data.length + '%';
 }
 
+window.switchComparativo = function(idx) {
+  compPairIdx = parseInt(idx);
+  renderComp();
+};
+
 function sortComp(col) {
-  var keys = ['Localidad', 'pct_petro_1v22', 'pct_cepeda_1v26', 'delta_petro_1v_pp_pct', 'votos_petro_1v22', 'votos_cepeda_1v26', 'sit_vs_1v22'];
+  var prefix = getCompPrefix(compPairIdx);
+  var keys = ['loc', prefix + '22', prefix + '26', prefix + 'delta', 'loc', 'loc', 'sit'];
   var key = keys[col];
-  compData.sort(function(a,b) {
-    var va = a[key], vb = b[key];
+  fullComp.sort(function(a, b) {
+    var va = a[key] !== undefined ? a[key] : 0;
+    var vb = b[key] !== undefined ? b[key] : 0;
     if (typeof va === 'number') return va - vb;
     return String(va).localeCompare(String(vb));
   });
   renderComp();
 }
-
-// Summary stats for comparativo
-var mejor = compData[compData.length - 1];
-var peor = compData[0];
-var gana = compData.filter(function(r) { return (r.sit_vs_1v22 || '').includes('GANA'); }).length;
-document.getElementById('comp-mejor').textContent = mejor.Localidad + ' (' + mejor.delta_petro_1v_pp_pct.toFixed(1) + ' pp)';
-document.getElementById('comp-peor').textContent = peor.Localidad + ' (' + peor.delta_petro_1v_pp_pct.toFixed(1) + ' pp)';
-document.getElementById('comp-gana').textContent = gana + ' de ' + compData.length;
-
 renderComp();
+
+// Title stats for default (Petro vs Cepeda)
+var title22 = (compData.reduce(function(s, r) { return s + (r.pct_petro_1v22 || 0); }, 0) / compData.length * 100).toFixed(1);
+var title26 = (compData.reduce(function(s, r) { return s + (r.pct_cepeda_1v26 || 0); }, 0) / compData.length * 100).toFixed(1);
+
+// ─── ECHARTS ───
+var chartTheme = {
+  color: ['#E53935','#1E88E5','#43A047','#8E24AA','#FB8C00','#FDD835','#6D4C41','#D81B60','#757575','#00ACC1','#FFB300','#795548','#00897B'],
+  backgroundColor: 'transparent',
+  textStyle: { fontFamily: 'Inter, sans-serif' },
+};
+echarts.registerTheme('colombia', chartTheme);
+
+function initChart(id) {
+  var dom = document.getElementById(id);
+  var chart = echarts.init(dom, 'colombia', { renderer: 'canvas' });
+  return chart;
+}
+
+// Chart 1: Votos totales por candidato
+(function() {
+  var chart = initChart('chart-candidatos');
+  var data = statsCand.map(function(r) { return { name: r.c, value: r.v }; });
+  chart.setOption({
+    tooltip: { trigger:'axis', axisPointer:{ type:'shadow' }, valueFormatter: function(v) { return Number(v).toLocaleString(); } },
+    grid: { left:80, right:40, top:20, bottom:20 },
+    xAxis: { type:'value', axisLabel:{ formatter: function(v) { return (v/1000000).toFixed(1) + 'M'; } }, splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
+    yAxis: { type:'category', data: data.map(function(d) { return d.name; }).reverse(), axisLabel:{ fontSize:11, fontWeight:500 } },
+    series: [{
+      type:'bar', data: data.map(function(d) { return d.value; }).reverse(),
+      itemStyle: { color: function(p) { return candColors[data[data.length-1-p.dataIndex].name] || '#ccc'; } },
+      barMaxWidth: 24, label: { show:true, position:'right', formatter: function(p) { return Number(p.value).toLocaleString(); }, fontSize:11, fontWeight:500 },
+      animationDuration: 800, animationEasing: 'elasticOut'
+    }]
+  });
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// Chart 2: Top 10 UPZ distribucion
+(function() {
+  var chart = initChart('chart-upz-dist');
+  var cands = ["IVÁN CEPEDA CASTRO", "ABELARDO DE LA ESPRIELLA", "PALOMA VALENCIA LASERNA", "SERGIO FAJARDO VALDERRAMA", "CLAUDIA LÓPEZ"];
+  cands.push('Otros');
+  var series = cands.map(function(c) {
+    return {
+      name: c, type: 'bar', stack: 'total',
+      data: upzDist.map(function(r) { return r[c] || 0; }),
+      itemStyle: { color: candColors[c] || '#ccc' },
+      barMaxWidth: 20
+    };
+  });
+  chart.setOption({
+    tooltip: { trigger:'axis', axisPointer:{ type:'shadow' }, formatter: function(ps) {
+      var html = '<strong>' + ps[0].axisValue + '</strong><br>';
+      ps.forEach(function(p) { html += p.marker + ' ' + p.seriesName + ': ' + p.value + '%<br>'; });
+      return html;
+    } },
+    legend: { data: cands, type:'scroll', bottom:0, itemWidth:10, itemHeight:10, textStyle:{ fontSize:11 } },
+    grid: { left:100, right:40, top:10, bottom:40 },
+    xAxis: { type:'value', max:100, axisLabel:{ formatter: '{value}%' }, splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
+    yAxis: { type:'category', data: upzDist.map(function(r) { return r.upz; }), axisLabel:{ fontSize:11, width:90, overflow:'truncate' } },
+    series: series
+  });
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// Chart 3: Matriz candidato x localidad
+(function() {
+  var chart = initChart('chart-matriz');
+  chart.setOption({
+    tooltip: { position:'top', formatter: function(p) {
+      return candNames[p.data[1]] + ' en ' + locList[p.data[0]] + ': <strong>' + p.data[2] + '%</strong>';
+    } },
+    grid: { left:130, right:40, top:20, bottom:60 },
+    xAxis: { type:'category', data: locList, axisLabel:{ rotate:45, fontSize:10, width:80, overflow:'break' }, splitArea:{ show:true } },
+    yAxis: { type:'category', data: candNames, axisLabel:{ fontSize:10, fontWeight:500 } },
+    visualMap: { min:0, max:70, calculable:true, orient:'horizontal', left:'center', bottom:0,
+      inRange: { color: ['#f7f7f7','#dadaeb','#9e9ac8','#6a51a3','#3f007d'] },
+      textStyle:{ fontSize:10 } },
+    series: [{
+      type:'heatmap', data: matrizData,
+      label: { show: true, fontSize: 8, color: '#333', formatter: function(p) { return p.data[2] > 0 ? p.data[2] + '%' : ''; } },
+      emphasis: { itemStyle: { shadowBlur:10, shadowColor:'rgba(0,0,0,0.15)' } }
+    }]
+  });
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// Chart 4: Brecha Cepeda vs Espriella
+(function() {
+  var chart = initChart('chart-brecha');
+  var labels = brechaData.map(function(r) { return r.upz; });
+  chart.setOption({
+    tooltip: { trigger:'axis', axisPointer:{ type:'shadow' }, formatter: function(ps) {
+      return '<strong>' + ps[0].axisValue + '</strong><br>' + ps.map(function(p) { return p.marker + ' ' + p.seriesName + ': ' + p.value + '%'; }).join('<br>');
+    } },
+    legend: { data: ['Cepeda', 'Espriella'], bottom:0, itemWidth:10, itemHeight:10, textStyle:{ fontSize:11 } },
+    grid: { left:120, right:30, top:10, bottom:40 },
+    xAxis: { type:'value', axisLabel:{ formatter: '{value}%' }, splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
+    yAxis: { type:'category', data: labels, axisLabel:{ fontSize:10, width:100, overflow:'truncate' } },
+    series: [
+      { name:'Cepeda', type:'bar', data: brechaData.map(function(r) { return r.cepeda; }),
+        itemStyle:{ color: "#B71C1C" }, barMaxWidth:14, barGap:'20%' },
+      { name:'Espriella', type:'bar', data: brechaData.map(function(r) { return r.espriella; }),
+        itemStyle:{ color: "#1565C0" }, barMaxWidth:14 }
+    ]
+  });
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// Chart 5: Scatter Petro 2022 vs Cepeda 2026
+(function() {
+  var chart = initChart('chart-scatter');
+  chart.setOption({
+    tooltip: { formatter: function(p) {
+      var d = p.data;
+      return '<strong>' + d[3] + '</strong><br>Petro 2022: ' + d[0] + '%<br>Cepeda 2026: ' + d[1] + '%<br>Delta: ' + (d[2] > 0 ? '+' : '') + d[2] + ' pp';
+    } },
+    grid: { left:60, right:30, top:30, bottom:50 },
+    xAxis: { name:'% Petro 2022', nameLocation:'center', nameGap:30, type:'value', splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
+    yAxis: { name:'% Cepeda 2026', nameLocation:'center', nameGap:30, type:'value', splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
+    series: [{
+      type:'scatter', data: scatterData,
+      symbolSize: 16,
+      itemStyle: { color: function(p) {
+        var d = p.data[2];
+        return d > -3 ? '#C62828' : d > -5.5 ? '#E65100' : d > -7 ? '#2E7D32' : '#1565C0';
+      }, shadowBlur:4, shadowColor:'rgba(0,0,0,0.1)' },
+      label: { show:true, formatter: function(p) { return p.data[3]; }, fontSize:10, color:'#616161', position:'right' },
+      markLine: {
+        data: [{ xAxis: 0, yAxis: 0, lineStyle:{ color:'#e0e0e0', type:'dashed' }, label:{ formatter:'y=x', position:'end' } }],
+        silent: true
+      },
+      animationDuration: 1000
+    }]
+  });
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// Chart 6: Dual-axis bar + line
+(function() {
+  var chart = initChart('chart-dual');
+  var locs = dualData.map(function(r) { return r.loc; });
+  chart.setOption({
+    tooltip: { trigger:'axis', axisPointer:{ type:'shadow' }, formatter: function(ps) {
+      var html = '<strong>' + ps[0].axisValue + '</strong><br>';
+      ps.forEach(function(p) { html += p.marker + ' ' + p.seriesName + ': ' + (p.seriesType === 'bar' ? p.value + '%' : p.value + ' pp') + '<br>'; });
+      return html;
+    } },
+    legend: { data: ['% Petro 2022', '% Cepeda 2026', 'Delta (pp)'], bottom:0, itemWidth:10, itemHeight:10, textStyle:{ fontSize:11 } },
+    grid: { left:60, right:60, top:15, bottom:40 },
+    xAxis: { type:'category', data: locs, axisLabel:{ rotate:45, fontSize:9, width:70, overflow:'break' } },
+    yAxis: [
+      { type:'value', name:'%', nameTextStyle:{ fontSize:11, color:'#616161' }, splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
+      { type:'value', name:'Delta pp', nameTextStyle:{ fontSize:11, color:'#616161' }, splitLine:{ show:false },
+        axisLabel:{ formatter: function(v) { return v + ' pp'; } } }
+    ],
+    series: [
+      { name:'% Petro 2022', type:'bar', data: dualData.map(function(r) { return r.petro; }),
+        itemStyle:{ color: "#B71C1C" }, barMaxWidth:12, barGap:'10%' },
+      { name:'% Cepeda 2026', type:'bar', data: dualData.map(function(r) { return r.cepeda; }),
+        itemStyle:{ color: "#1565C0" }, barMaxWidth:12 },
+      { name:'Delta (pp)', type:'line', data: dualData.map(function(r) { return r.delta; }),
+        yAxisIndex:1, symbol:'circle', symbolSize:6,
+        lineStyle:{ color:"#E65100", width:2 },
+        itemStyle:{ color:"#E65100" },
+        areaStyle:{ color: 'rgba(249,168,37,0.1)' } }
+    ]
+  });
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// Chart 7: Comparativo heatmap - todos los pares 2022 vs 2026
+(function() {
+  var chart = initChart('chart-comp-heatmap');
+  // Build data: rows = localidades, cols = pairs, value = delta
+  var pairLabels = compPairs.map(function(p) { return p.split(' vs ').join('\n'); });
+  var heatData = [];
+  fullComp.forEach(function(r, i) {
+    compPairs.forEach(function(p, j) {
+      var prefix = p.replace(/[^a-z0-9]/gi, '_').replace(/vs/g, 'vs') + '_';
+      var d = r[prefix + 'delta'] || 0;
+      heatData.push([j, i, d]);
+    });
+  });
+  var maxAbs = Math.max.apply(null, heatData.map(function(d) { return Math.abs(d[2]); }));
+  var locs = fullComp.map(function(r) { return r.loc; });
+  chart.setOption({
+    tooltip: { position:'top', formatter: function(p) {
+      return locs[p.data[1]] + '<br>' + compPairs[p.data[0]] + ': <strong>' + (p.data[2] > 0 ? '+' : '') + p.data[2].toFixed(1) + ' pp</strong>';
+    } },
+    grid: { left:90, right:30, top:10, bottom:60 },
+    xAxis: { type:'category', data: compPairs, axisLabel:{ fontSize:9, interval:0, width:70, overflow:'break' } },
+    yAxis: { type:'category', data: locs, axisLabel:{ fontSize:9 } },
+    visualMap: { min:-maxAbs, max:maxAbs, calculable:true, orient:'horizontal', left:'center', bottom:0,
+      inRange: { color: ['#C62828', '#f7f7f7', '#2E7D32'] },
+      textStyle:{ fontSize:10 } },
+    series: [{
+      type:'heatmap', data: heatData,
+      label: { show:false },
+      emphasis: { itemStyle: { shadowBlur:10, shadowColor:'rgba(0,0,0,0.15)' } }
+    }]
+  });
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// Chart 8: Box-style distribution of deltas per pair (using scatter/bar)
+(function() {
+  var chart = initChart('chart-comp-box');
+  var series = compPairs.map(function(p) {
+    var prefix = p.replace(/[^a-z0-9]/gi, '_').replace(/vs/g, 'vs') + '_';
+    var vals = fullComp.map(function(r) { return r[prefix + 'delta'] || 0; }).sort(function(a,b) { return a-b; });
+    return {
+      name: p.split(' vs ').join(' '),
+      type: 'boxplot',
+      data: [vals],
+      itemStyle: { color: '#B71C1C' },
+    };
+  });
+  chart.setOption({
+    tooltip: { trigger:'axis', formatter: function(ps) {
+      var d = ps[0].data;
+      return '<strong>' + ps[0].seriesName + '</strong><br>Min: ' + d[1].toFixed(1) + ' pp<br>Q1: ' + d[2].toFixed(1) + ' pp<br>Med: ' + d[3].toFixed(1) + ' pp<br>Q3: ' + d[4].toFixed(1) + ' pp<br>Max: ' + d[5].toFixed(1) + ' pp';
+    } },
+    grid: { left:60, right:30, top:30, bottom:60 },
+    xAxis: { type:'category', data: compPairs, axisLabel:{ fontSize:9, width:70, overflow:'break' } },
+    yAxis: { type:'value', name:'Delta (pp)', splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
+    series: series
+  });
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// ─── SECTION NAV ───
+(function() {
+  var links = document.querySelectorAll('.section-nav a');
+  var sections = [];
+  links.forEach(function(a) {
+    var id = a.getAttribute('href').slice(1);
+    sections.push(document.getElementById(id));
+  });
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        links.forEach(function(l) { l.classList.remove('active'); });
+        var link = document.querySelector('.section-nav a[href="#' + entry.target.id + '"]');
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin:'-100px 0px -60% 0px' });
+  sections.forEach(function(s) { if (s) observer.observe(s); });
+})();
 </script>
 </body>
 </html>
