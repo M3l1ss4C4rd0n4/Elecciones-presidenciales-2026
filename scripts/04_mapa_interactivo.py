@@ -518,7 +518,7 @@ html = f"""<!DOCTYPE html>
       zoomToBoundsOnClick: true,
       iconCreateFunction: function(cluster) {{
         var childCount = cluster.getChildCount();
-        return L.divIcon({{ html: '<div style="background:'+P['primary']+';color:white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.2)">'+childCount+'</div>', className:'', iconSize:L.point(36,36) }});
+        return L.divIcon({{ html: '<div style="background:'+'{P['primary']}'+';color:white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.2)">'+childCount+'</div>', className:'', iconSize:L.point(36,36) }});
       }}
     }});
     L.geoJSON(data, {{
