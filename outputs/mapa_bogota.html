@@ -94,6 +94,8 @@
     font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; font-size:12px !important; color:#212121 !important;
     line-height:1.5 !important; }
   .leaflet-tooltip-top::before { border-top-color:white !important; }
+  .puesto-tooltip { font-size:11px !important; padding:6px 10px !important; line-height:1.4 !important; }
+  .puesto-tooltip b { font-size:12px; }
   .tt-name { font-weight:600; }
   .tt-sub { color:#616161; font-size:11px; }
   .tt-val { color:#B71C1C; font-weight:500; font-size:12px; }
@@ -293,7 +295,7 @@
 
   function buildPuestosLayer(data) {
     var cluster = L.markerClusterGroup({
-      maxClusterRadius: 50,
+      maxClusterRadius: 30,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
@@ -305,11 +307,22 @@
     L.geoJSON(data, {
       pointToLayer: function(feature, latlng) {
         var p = feature.properties;
-        var r = Math.max(3, Math.sqrt(p.TOTAL_VOTOS || 100) / 10);
-        return L.circleMarker(latlng, {
-          radius: r, fillColor: candColors[p.GANADOR] || '#ccc',
-          color: 'white', weight: 1, fillOpacity: 0.8
+        var r = Math.max(6, Math.sqrt(p.TOTAL_VOTOS || 200) / 8);
+        var color = candColors[p.GANADOR] || '#ccc';
+        var m = L.circleMarker(latlng, {
+          radius: r, fillColor: color,
+          color: 'white', weight: 1, fillOpacity: 0.85
         });
+        // Tooltip on mouseover via label (more reliable than Leaflet tooltip with clusters)
+        var nom = p.NOMBRE || 'Puesto';
+        var gan = p.GANADOR || 'N/A';
+        var total = Number(p.TOTAL_VOTOS || 0);
+        var pct = Number(p.PCT_GANADOR || 0);
+        var loc = p.LOCALIDAD || '';
+        m.bindTooltip('<b>' + nom + '</b><br>' + loc + '<br>' + gan + ': ' + total.toLocaleString() + ' v (' + pct.toFixed(1) + '%)', {
+          sticky:true, direction:'top', offset:L.point(0,-4), className:'puesto-tooltip'
+        });
+        return m;
       },
       onEachFeature: function(feature, layer) {
         var p = feature.properties;
@@ -321,21 +334,17 @@
         var dir = p.DIRECCION || '';
         var loc = p.LOCALIDAD || '';
         var color = candColors[gan] || '#ccc';
-        layer.bindTooltip('<div class="tt-name">' + nom + '</div>' +
-          '<div class="tt-sub">' + loc + '</div>' +
-          '<div class="tt-val">' + gan + '</div>' +
-          '<div class="tt-total">' + total.toLocaleString() + ' votos &middot; ' + pct.toFixed(1) + '%</div>', {
-          sticky: true, direction:'top', offset:L.point(0,-8)
-        });
-        var popupContent = '<div class="pp"><div class="pp-header"><span class="pp-title">' + nom +
+        layer.bindPopup(
+          '<div class="pp"><div class="pp-header"><span class="pp-title">' + nom +
           '</span><span class="pp-subtitle">' + dir + '</span></div>' +
           '<div style="padding:12px 16px">' +
           '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0F0F0;font-size:12px"><span style="color:#757575">Localidad</span><span style="font-weight:600;color:#333">' + loc + '</span></div>' +
           '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0F0F0;font-size:12px"><span style="color:#757575">Ganador</span><span style="font-weight:600;color:' + color + '">' + gan + '</span></div>' +
           '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0F0F0;font-size:12px"><span style="color:#757575">Total votos</span><span style="font-weight:600;font-family:JetBrains Mono,monospace;color:#333">' + total.toLocaleString() + '</span></div>' +
           '<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span style="color:#757575">Votos ganador</span><span style="font-weight:600;font-family:JetBrains Mono,monospace;color:#333">' + vg.toLocaleString() + ' (' + pct.toFixed(1) + '%)</span></div>' +
-          '</div></div>';
-        layer.bindPopup(popupContent, { maxWidth:340, className:'' });
+          '</div></div>',
+          { maxWidth:340, className:'' }
+        );
       }
     }).eachLayer(function(l) { cluster.addLayer(l); });
     return cluster;
