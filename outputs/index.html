@@ -78,6 +78,7 @@
   .stat-card .stat-icon.success { background:#E8F5E9; color:#2E7D32; }
   .stat-card .stat-icon.warning { background:#FFF3E0; color:#E65100; }
   .stat-card .stat-num { font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace; font-size:28px; font-weight:700; color:#212121; line-height:1.1; }
+  .stat-card .stat-num-sm { font-family:'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace; font-size:14px; font-weight:600; color:#212121; line-height:1.3; }
   .stat-card .stat-label { font-size:12px; color:#616161; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
   .stat-card .stat-bar { height:3px; border-radius:2px; margin-top:12px; background:#F0F0F0; overflow:hidden; }
   .stat-card .stat-bar-fill { height:100%; border-radius:2px; transition:width 0.6s ease; }
@@ -335,28 +336,28 @@ body { padding-bottom:48px; }
       <div class="stat-icon warning">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
       </div>
-      <div class="stat-num" id="comp-mejor">-</div>
+      <div class="stat-num-sm" id="comp-mejor">-</div>
       <div class="stat-label">Mejor desempeno</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon error">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
       </div>
-      <div class="stat-num" id="comp-peor">-</div>
+      <div class="stat-num-sm" id="comp-peor">-</div>
       <div class="stat-label">Peor desempeno</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon primary">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       </div>
-      <div class="stat-num" id="comp-pct22">-</div>
+      <div class="stat-num-sm" id="comp-pct22">-</div>
       <div class="stat-label">% 2022 citywide</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon accent">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div class="stat-num" id="comp-pct26">-</div>
+      <div class="stat-num-sm" id="comp-pct26">-</div>
       <div class="stat-label">% 2026 citywide</div>
     </div>
   </div>
@@ -372,9 +373,10 @@ body { padding-bottom:48px; }
     <div class="card">
       <div class="card-header">
         <div class="card-title">Distribucion de deltas</div>
-        <div class="card-subtitle">Variacion en puntos porcentuales entre elecciones</div>
+        <div class="card-subtitle">Rango de variacion (pp) entre 2022 y 2026 para cada par</div>
       </div>
-      <div class="card-body"><div class="chart-box" id="chart-comp-box"></div></div>
+      <div class="card-body"><div class="chart-box" id="chart-comp-box"></div>
+        <div style="padding:8px 16px 16px;font-size:11px;color:#9E9E9E;line-height:1.4">Cada caja muestra la distribucion del delta entre 2022 y 2026. La linea central es la mediana; los extremos son el minimo y maximo. La linea punteada marca 0 pp (sin cambio).</div></div>
     </div>
   </div>
 
@@ -534,8 +536,8 @@ function renderComp() {
   var mejor = sorted[0], peor = sorted[sorted.length - 1];
   document.getElementById('comp-mejor').textContent = mejor.loc + ' (' + (mejor.delta > 0 ? '+' : '') + mejor.delta.toFixed(1) + ' pp)';
   document.getElementById('comp-peor').textContent = peor.loc + ' (' + (peor.delta > 0 ? '+' : '') + peor.delta.toFixed(1) + ' pp)';
-  document.getElementById('comp-pct22').textContent = data.reduce(function(s, r) { return s + r.pct22; }, 0) / data.length + '%';
-  document.getElementById('comp-pct26').textContent = data.reduce(function(s, r) { return s + r.pct26; }, 0) / data.length + '%';
+  document.getElementById('comp-pct22').textContent = (data.reduce(function(s, r) { return s + r.pct22; }, 0) / data.length).toFixed(1) + '%';
+  document.getElementById('comp-pct26').textContent = (data.reduce(function(s, r) { return s + r.pct26; }, 0) / data.length).toFixed(1) + '%';
 }
 
 window.switchComparativo = function(idx) {
@@ -763,7 +765,7 @@ function initChart(id) {
   window.addEventListener('resize', function() { chart.resize(); });
 })();
 
-// Chart 8: Box-style distribution of deltas per pair (using scatter/bar)
+// Chart 8: Box-style distribution of deltas per pair
 (function() {
   var chart = initChart('chart-comp-box');
   var series = compPairs.map(function(p) {
@@ -776,14 +778,34 @@ function initChart(id) {
       itemStyle: { color: '#B71C1C' },
     };
   });
+  // Add a reference line at 0
+  series.push({
+    type: 'line',
+    markLine: {
+      silent: true,
+      data: [{
+        yAxis: 0,
+        label: { formatter: 'Sin cambio (0 pp)', fontSize:10, color:'#616161' },
+        lineStyle: { color:'#9E9E9E', type:'dashed', width:1 }
+      }]
+    }
+  });
   chart.setOption({
     tooltip: { trigger:'axis', formatter: function(ps) {
       var d = ps[0].data;
-      return '<strong>' + ps[0].seriesName + '</strong><br>Min: ' + d[1].toFixed(1) + ' pp<br>Q1: ' + d[2].toFixed(1) + ' pp<br>Med: ' + d[3].toFixed(1) + ' pp<br>Q3: ' + d[4].toFixed(1) + ' pp<br>Max: ' + d[5].toFixed(1) + ' pp';
+      return '<strong>' + ps[0].seriesName + '</strong><br>' +
+        '<span style="color:#757575">Valor minimo</span>: ' + d[1].toFixed(1) + ' pp<br>' +
+        '<span style="color:#757575">25% percentil</span>: ' + d[2].toFixed(1) + ' pp<br>' +
+        '<span style="color:#757575">Mediana</span>: <strong>' + d[3].toFixed(1) + '</strong> pp<br>' +
+        '<span style="color:#757575">75% percentil</span>: ' + d[4].toFixed(1) + ' pp<br>' +
+        '<span style="color:#757575">Valor maximo</span>: ' + d[5].toFixed(1) + ' pp';
     } },
     grid: { left:60, right:30, top:30, bottom:60 },
-    xAxis: { type:'category', data: compPairs, axisLabel:{ fontSize:9, width:70, overflow:'break' } },
-    yAxis: { type:'value', name:'Delta (pp)', splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
+    xAxis: { type:'category', data: compPairs,
+      axisLabel:{ fontSize:9, width:70, overflow:'break' } },
+    yAxis: { type:'value', name:'Delta (pp)',
+      axisLabel:{ formatter: function(v) { return v.toFixed(0); } },
+      splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
     series: series
   });
   window.addEventListener('resize', function() { chart.resize(); });

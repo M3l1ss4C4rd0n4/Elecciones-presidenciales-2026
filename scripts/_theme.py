@@ -133,6 +133,7 @@ CSS_STAT_CARD = """
   .stat-card .stat-icon.success { background:""" + P['success-bg'] + """; color:""" + P['success'] + """; }
   .stat-card .stat-icon.warning { background:""" + P['warning-bg'] + """; color:""" + P['warning'] + """; }
   .stat-card .stat-num { font-family:""" + FONT_MONO + """; font-size:28px; font-weight:700; color:""" + P['text'] + """; line-height:1.1; }
+  .stat-card .stat-num-sm { font-family:""" + FONT_MONO + """; font-size:14px; font-weight:600; color:""" + P['text'] + """; line-height:1.3; }
   .stat-card .stat-label { font-size:12px; color:""" + P['text-secondary'] + """; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
   .stat-card .stat-bar { height:3px; border-radius:2px; margin-top:12px; background:""" + P['border-light'] + """; overflow:hidden; }
   .stat-card .stat-bar-fill { height:100%; border-radius:2px; transition:width 0.6s ease; }

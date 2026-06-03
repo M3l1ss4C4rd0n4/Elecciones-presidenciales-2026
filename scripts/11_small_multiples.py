@@ -59,8 +59,7 @@ html = f"""<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Small Multiples - Candidatos 2026</title>
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://d3js.org/topojson-client.v3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -88,11 +87,12 @@ html = f"""<!DOCTYPE html>
   Todos los candidatos
   <span style="font-size:12px;font-weight:400;color:{P['text-secondary']}">Clic para ver en el mapa</span>
 </div>
-<div class="grid" id="grid"></div>
+<div class="grid" id="grid"><div style="grid-column:1/-1;text-align:center;padding:40px;color:#9E9E9E;font-size:13px">Cargando mapas...</div></div>
 <div class="hint">Cada mapa coloreado por % de votacion del candidato en cada UPZ | Escala compartida (0-100%)</div>
 
 <script>
 (function() {{
+  try {{
   var geoJSON = {topo_str};
   var candData = {data_json};
   var candOrder = {cand_labels};
@@ -156,6 +156,9 @@ html = f"""<!DOCTYPE html>
 
     grid.appendChild(card);
   }});
+  }} catch(e) {{
+    document.getElementById('grid').innerHTML = '<div style="padding:40px;text-align:center;color:#C62828;font-size:13px">Error al cargar mapas: ' + e.message + '</div>';
+  }}
 }})();
 </script>
 </body>
