@@ -32,6 +32,10 @@ votos = pd.read_csv(os.path.join(PROC, 'votos_por_upz.csv'))
 votos['CANNOMBRE'] = votos['CANNOMBRE'].apply(fix_name)
 upz_geo = gpd.read_file(os.path.join(PROC, 'upz_con_votos.geojson'))
 
+# ─── COMPARATIVO 2022-2026 ───
+comp_upz = pd.read_csv(os.path.join(PROC, 'comparativo_upz.csv'))
+comp_by_loc = {r['Localidad']: r for r in json.load(open(os.path.join(PROC, 'comparativo_localidad.json'), encoding='utf-8'))}
+
 cand_order = (
     votos.groupby('CANNOMBRE')['VOTOS'].sum()
     .sort_values(ascending=False).index.tolist()
@@ -43,6 +47,18 @@ upz_geo_4326 = upz_geo.to_crs('EPSG:4326')
 upz_geo_4326 = upz_geo_4326.merge(pivot, on='UPLCODIGO', how='left')
 for col in cand_order:
     upz_geo_4326[col] = upz_geo_4326[col].fillna(0).astype(float)
+
+# Merge comparativo
+comp_fields = ['delta_petro_1v_pp','delta_petro_2v_pp','sit_vs_1v22','sit_vs_2v22',
+               'votos_petro_1v22','votos_cepeda_1v26']
+for col in comp_fields:
+    if col not in comp_upz.columns:
+        comp_upz[col] = 0
+upz_geo_4326 = upz_geo_4326.merge(comp_upz[['UPLCODIGO'] + comp_fields], on='UPLCODIGO', how='left')
+for col in comp_fields:
+    upz_geo_4326[col] = upz_geo_4326[col].fillna(0)
+    if col.startswith('votos_'):
+        upz_geo_4326[col] = upz_geo_4326[col].astype(float)
 
 total_col = 'TOTAL_VOTOS'
 if total_col not in upz_geo_4326.columns:
@@ -110,6 +126,13 @@ for idx in upz_geo_4326.index:
             f'<td style="padding:3px 6px;text-align:right">{p:.1f}%</td>'
             f'<td style="padding:3px 6px;width:100px"><div style="background:#1a1a2e;height:10px;width:{bar_pct:.0f}%;border-radius:3px;min-width:2px"></div></td></tr>'
         )
+    d1v_upz = props.get('delta_petro_1v_pp', 0)
+    vc26_upz = int(props.get('votos_cepeda_1v26', 0))
+    vp22_upz = int(props.get('votos_petro_1v22', 0))
+    comp_row_upz = f'<p style="margin:8px 0 0;font-size:12px;color:#1a1a2e;border-top:1px solid #eee;padding-top:6px">'
+    comp_row_upz += f'<strong>Comparativo 2022-2026:</strong><br>'
+    comp_row_upz += f'Cepeda 26: {vc26_upz:,} votos | Petro 22: {vp22_upz:,} votos<br>'
+    comp_row_upz += f'Delta: {d1v_upz:+.1f} pp</p>' if d1v_upz != 0 else ''
     upz_geo_4326.at[idx, '_popup'] = (
         f'<div style="min-width:320px;font-family:system-ui">'
         f'<h4 style="margin:0 0 4px">{uplnombre}</h4>'
@@ -120,25 +143,30 @@ for idx in upz_geo_4326.index:
         f'<th style="padding:4px 6px;text-align:right">Votos</th>'
         f'<th style="padding:4px 6px;text-align:right">%</th>'
         f'<th style="padding:4px 6px;width:100px"></th></tr></thead>'
-        f'<tbody>{popup_rows}</tbody></table></div>'
+        f'<tbody>{popup_rows}</tbody></table>'
+        f'{comp_row_upz}</div>'
     )
 
 # ─── GEOJSON UPZ ───
-drop_cols = [c for c in upz_geo_4326.columns
-             if c not in cand_order
-             and not c.startswith('pct_')
-             and not c.startswith('diff_')
-             and c not in ['UPLCODIGO','UPLNOMBRE','LOCNOMBRE','LOCCODIGO',
-                           total_col,'_popup','GANADOR','MARGEN_VOTOS',
-                           'MARGEN_PCT','COLOR_GANADOR','GANADOR_IDX','geometry']]
+keep_cols = (['UPLCODIGO','UPLNOMBRE','LOCNOMBRE','LOCCODIGO',total_col,
+              '_popup','GANADOR','MARGEN_VOTOS','MARGEN_PCT','COLOR_GANADOR',
+              'GANADOR_IDX','geometry'] + cand_order
+             + [f'pct_{c}' for c in cand_order]
+             + [f'diff_{c}' for c in cand_order]
+             + comp_fields)
+drop_cols = [c for c in upz_geo_4326.columns if c not in keep_cols]
 upz_clean = upz_geo_4326.drop(columns=drop_cols)
 geo_json_str = json.dumps(upz_clean.__geo_interface__, ensure_ascii=False)
 
 # ─── LOCALIDAD LEVEL ───
-loc_agg = upz_geo_4326[[total_col] + cand_order + ['LOCNOMBRE']].copy()
-loc_agg = loc_agg.groupby('LOCNOMBRE').sum(numeric_only=True).reset_index()
+loc_agg = upz_geo_4326[[total_col] + cand_order + comp_fields + ['LOCNOMBRE']].copy()
+vote_sum_cols = [total_col] + cand_order + ['votos_petro_1v22','votos_cepeda_1v26']
+first_cols = ['delta_petro_1v_pp','delta_petro_2v_pp','sit_vs_1v22','sit_vs_2v22']
+loc_agg_sum = loc_agg[vote_sum_cols + ['LOCNOMBRE']].groupby('LOCNOMBRE').sum(numeric_only=True).reset_index()
+loc_agg_first = loc_agg[first_cols + ['LOCNOMBRE']].groupby('LOCNOMBRE').first().reset_index()
 loc_geo = upz_geo_4326[['LOCNOMBRE','geometry']].dissolve(by='LOCNOMBRE', aggfunc='first').reset_index()
-loc_geo = loc_geo.merge(loc_agg, on='LOCNOMBRE', how='left')
+loc_geo = loc_geo.merge(loc_agg_sum, on='LOCNOMBRE', how='left')
+loc_geo = loc_geo.merge(loc_agg_first, on='LOCNOMBRE', how='left')
 
 for cand in cand_order:
     loc_geo[cand] = loc_geo[cand].fillna(0).astype(float)
@@ -185,6 +213,13 @@ for idx in loc_geo.index:
             f'<td style="padding:3px 6px;text-align:right">{p:.1f}%</td>'
             f'<td style="padding:3px 6px;width:100px"><div style="background:#1a1a2e;height:10px;width:{bar_pct:.0f}%;border-radius:3px;min-width:2px"></div></td></tr>'
         )
+    d1v = props.get('delta_petro_1v_pp', 0)
+    vc26 = int(props.get('votos_cepeda_1v26', 0))
+    vp22 = int(props.get('votos_petro_1v22', 0))
+    comp_row = f'<p style="margin:8px 0 0;font-size:12px;color:#1a1a2e;border-top:1px solid #eee;padding-top:6px">'
+    comp_row += f'<strong>Comparativo 2022-2026:</strong><br>'
+    comp_row += f'Cepeda 26: {vc26:,} votos | Petro 22: {vp22:,} votos<br>'
+    comp_row += f'Delta: {d1v:+.1f} pp</p>' if d1v != 0 else ''
     loc_geo.at[idx, '_popup'] = (
         f'<div style="min-width:320px;font-family:system-ui">'
         f'<h4 style="margin:0 0 4px">{locnombre} (Localidad)</h4>'
@@ -195,17 +230,18 @@ for idx in loc_geo.index:
         f'<th style="padding:4px 6px;text-align:right">Votos</th>'
         f'<th style="padding:4px 6px;text-align:right">%</th>'
         f'<th style="padding:4px 6px;width:100px"></th></tr></thead>'
-        f'<tbody>{popup_rows}</tbody></table></div>'
+        f'<tbody>{popup_rows}</tbody></table>'
+        f'{comp_row}</div>'
     )
 
 # ─── GEOJSON LOCALIDAD ───
-drop_loc = [c for c in loc_geo.columns
-            if c not in cand_order
-            and not c.startswith('pct_')
-            and not c.startswith('diff_')
-            and c not in ['LOCNOMBRE', total_col, '_popup', 'GANADOR',
-                          'MARGEN_VOTOS', 'MARGEN_PCT', 'COLOR_GANADOR',
-                          'GANADOR_IDX', 'geometry']]
+keep_loc = (['LOCNOMBRE', total_col, '_popup', 'GANADOR',
+             'MARGEN_VOTOS', 'MARGEN_PCT', 'COLOR_GANADOR',
+             'GANADOR_IDX', 'geometry'] + cand_order
+            + [f'pct_{c}' for c in cand_order]
+            + [f'diff_{c}' for c in cand_order]
+            + comp_fields)
+drop_loc = [c for c in loc_geo.columns if c not in keep_loc]
 loc_clean = loc_geo.drop(columns=drop_loc)
 loc_clean['UPLNOMBRE'] = loc_clean['LOCNOMBRE']
 loc_clean['UPLCODIGO'] = loc_clean['LOCNOMBRE']
@@ -270,6 +306,7 @@ html = f"""<!DOCTYPE html>
     <option value="relative">Relativo (min-max por candidato)</option>
     <option value="percentage">% del UPZ (0% a 100%)</option>
     <option value="difference">Diferencia vs promedio</option>
+    <option value="comparative">Comparativo Cepeda 26 vs Petro 22</option>
   </select>
 
   <div style="display:flex;gap:4px;margin-bottom:6px">
@@ -377,6 +414,13 @@ html = f"""<!DOCTYPE html>
     var extra = '';
     if (mode === 'winner') {{
       extra = 'Ganador: ' + (p.GANADOR || '');
+    }} else if (mode === 'comparative') {{
+      var d = p.delta_petro_1v_pp || 0;
+      var vc = p.votos_cepeda_1v26 || 0;
+      var vp = p.votos_petro_1v22 || 0;
+      var sit = p.sit_vs_1v22 || '';
+      extra = 'Cepeda 26: ' + Number(vc).toLocaleString() + ' votos | Petro 22: ' + Number(vp).toLocaleString() + ' votos';
+      extra += '<br>Delta: ' + (d > 0 ? '+' : '') + d.toFixed(1) + ' pp ' + sit;
     }} else if (sel.length === 1) {{
       var cand = candOrder[sel[0]];
       if (mode === 'percentage') {{
@@ -394,12 +438,11 @@ html = f"""<!DOCTYPE html>
     }} else {{
       extra = 'Ganador: ' + (p.GANADOR || '');
     }}
-    var viewLabel = currentView === 'loc' ? 'Localidad' : 'UPZ';
     var name = p.UPLNOMBRE || p.LOCNOMBRE || '';
     var tt = '<strong>' + name + '</strong>';
     if (currentView === 'upz' && p.LOCNOMBRE) tt += '<br><span style="color:#666;font-size:12px">'+p.LOCNOMBRE+'</span>';
     if (extra) tt += '<br><span style="color:#1a1a2e;font-size:12px;font-weight:500">'+extra+'</span>';
-    if (p.TOTAL_VOTOS) tt += '<br><span style="color:#999;font-size:11px">Total: '+Number(p.TOTAL_VOTOS).toLocaleString()+' votos</span>';
+    if (p.TOTAL_VOTOS && mode !== 'comparative') tt += '<br><span style="color:#999;font-size:11px">Total: '+Number(p.TOTAL_VOTOS).toLocaleString()+' votos</span>';
     return tt;
   }}
 
@@ -432,10 +475,43 @@ html = f"""<!DOCTYPE html>
   map.fitBounds(upzLayer.getBounds().pad(0.05));
 
   // ─── LOGICA DE VISUALIZACION ───
+  function getCompRange() {{
+    var activeData = getActiveData();
+    var minV = 0, maxV = 0;
+    activeData.features.forEach(function(f) {{
+      var d = parseFloat(f.properties.delta_petro_1v_pp) || 0;
+      if (d < minV) minV = d;
+      if (d > maxV) maxV = d;
+    }});
+    return {{min: minV, max: maxV}};
+  }}
+
   function applyStyle(layer) {{
     var p = layer.feature.properties;
     var sel = selectedCands;
     var mode = currentMode;
+
+    if (mode === 'comparative') {{
+      var d = parseFloat(p.delta_petro_1v_pp) || 0;
+      var compR = getCompRange();
+      var minD = compR.min, maxD = compR.max;
+      var idx;
+      if (minD === maxD) {{
+        idx = 4;
+      }} else if (d >= 0) {{
+        // Positive: use blue side
+        idx = 4 + Math.floor((d / maxD) * 4);
+        idx = Math.min(idx, 8);
+      }} else {{
+        // Negative: use red side
+        idx = Math.floor((d - minD) / (-minD) * 4);
+        idx = Math.min(idx, 4);
+        idx = 4 - idx;
+      }}
+      idx = Math.max(0, Math.min(Math.round(idx), 8));
+      layer.setStyle({{ fillColor:rdbu[idx], fillOpacity:0.85, color:'#555', weight:1 }});
+      return;
+    }}
 
     if (mode === 'winner') {{
       var color = p.COLOR_GANADOR || '#e0e0e0';
@@ -530,6 +606,20 @@ html = f"""<!DOCTYPE html>
     var viewLabel = currentView === 'loc' ? 'Localidad' : 'UPZ';
     var activeData = getActiveData();
 
+    if (currentMode === 'comparative') {{
+      title.textContent = 'Comparativo Cepeda 2026 vs Petro 2022 (delta pp)';
+      var compR = getCompRange();
+      bar.style.background = 'linear-gradient(to right, '+rdbu.join(', ')+')';
+      bar.style.display = 'block';
+      labels.style.display = 'flex';
+      document.getElementById('legend-min').textContent = compR.min.toFixed(1) + ' pp';
+      document.getElementById('legend-mid').textContent = '0';
+      document.getElementById('legend-max').textContent = compR.max.toFixed(1) + ' pp';
+      el.innerHTML = '<div style="font-size:11px;color:#666;margin-top:4px">Rojo = Cepeda pierde terreno<br>Azul = Cepeda mantiene/gana</div>';
+      document.getElementById('legend').style.display = 'block';
+      return;
+    }}
+
     if (currentMode === 'winner') {{
       title.textContent = 'Ganador por ' + viewLabel + ' (intensidad = margen)';
       var counts = {{}};
@@ -591,11 +681,14 @@ html = f"""<!DOCTYPE html>
   // ─── EVENTOS ───
   document.getElementById('mode-selector').addEventListener('change', function() {{
     currentMode = this.value;
-    document.getElementById('cand-selector').style.display = (currentMode === 'winner') ? 'none' : 'block';
+    document.getElementById('cand-selector').style.display = (currentMode === 'winner' || currentMode === 'comparative') ? 'none' : 'block';
     updateMap();
   }});
 
   document.getElementById('cand-selector').style.display = 'none';
+
+  // Pass comparativo range to window so legend can use it
+  window.getCompRange = getCompRange;
 
   updateMap();
 }})();
@@ -611,4 +704,5 @@ print(f'  OK  {map_path}')
 print(f'      - Modo GANADOR: todos los candidatos visibles a la vez')
 print(f'      - Checkboxes multi-select para candidatos')
 print(f'      - 1 selec: choropleth (relative / % / difference) | 2 selec: diferencia | 3+: ganador')
-print(f'      - Paletas: YlOrRd (relative), Purples (%), RdBu (diferencia)')
+print(f'      - Modo comparativo 2022-2026: delta Cepeda vs Petro (RdBu)')
+print(f'      - Paletas: YlOrRd (relative), Purples (%), RdBu (diferencia/comparativo)')

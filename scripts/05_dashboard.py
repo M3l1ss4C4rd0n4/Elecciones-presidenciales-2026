@@ -79,6 +79,16 @@ for c in cand_order:
 
 stats_json = json.dumps(stats_cand, ensure_ascii=False)
 
+# ─── COMPARATIVO 2022-2026 ───
+comp_loc = json.load(open(os.path.join(PROC, 'comparativo_localidad.json'), encoding='utf-8'))
+for r in comp_loc:
+    # Los deltas vienen como fraccion (e.g. -0.063 = -6.3pp)
+    r['delta_petro_1v_pp_pct'] = round(float(r.get('delta_petro_1v_pp', 0)) * 100, 1)
+    r['votos_petro_1v22'] = int(r.get('votos_petro_1v22', 0))
+    r['votos_cepeda_1v26'] = int(r.get('votos_cepeda_1v26', 0))
+comp_loc.sort(key=lambda x: x['delta_petro_1v_pp_pct'])
+comp_json = json.dumps(comp_loc, ensure_ascii=False)
+
 # ─── HTML ───
 html = f"""<!DOCTYPE html>
 <html lang="es">
@@ -138,7 +148,7 @@ html = f"""<!DOCTYPE html>
 </div>
 
 <div class="section">
-  <div class="section-title">Mapa interactivo <span class="badge">4 modos: ganador / relativo / % / diferencia + multi-select</span></div>
+  <div class="section-title">Mapa interactivo <span class="badge">5 modos: ganador / relativo / % / diferencia / comparativo 22-26 + multi-select</span></div>
   <iframe class="map-frame" src="mapa_bogota.html"></iframe>
 </div>
 
@@ -202,6 +212,32 @@ html = f"""<!DOCTYPE html>
   </div>
 </div>
 
+<div class="section">
+  <div class="section-title">Comparativo Cepeda 2026 vs Petro 2022 <span class="badge">por localidad</span></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="comp-stats">
+    <div class="stat-card"><div class="num" id="comp-mejor">-</div><div class="label">Mejor delta (menos peor)</div></div>
+    <div class="stat-card"><div class="num" id="comp-peor">-</div><div class="label">Peor delta (mas negativo)</div></div>
+    <div class="stat-card"><div class="num" id="comp-gana">-</div><div class="label">Localidades donde Cepeda ganó en votos</div></div>
+  </div>
+  <div class="table-wrap" style="max-height:400px">
+    <table id="comp-table">
+      <thead>
+        <tr>
+          <th onclick="sortComp(0)">Localidad</th>
+          <th onclick="sortComp(1)">% Petro 2022</th>
+          <th onclick="sortComp(2)">% Cepeda 2026</th>
+          <th onclick="sortComp(3)">Delta (pp)</th>
+          <th onclick="sortComp(4)">Votos Petro 22</th>
+          <th onclick="sortComp(5)">Votos Cepeda 26</th>
+          <th onclick="sortComp(6)">Situación</th>
+        </tr>
+      </thead>
+      <tbody id="comp-body">
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <div style="text-align:center;padding:16px;color:#999;font-size:12px">
   Generado con datos de la Registradur&iacute;a Nacional (2026) y geograf&iacute;a de IDECA.
 </div>
@@ -259,6 +295,48 @@ function sortTable(col) {{
 
 // Initial render
 renderTable(tableData);
+
+// ─── COMPARATIVO ───
+var compData = {comp_json};
+
+function renderComp() {{
+  var tbody = document.getElementById('comp-body');
+  tbody.innerHTML = compData.map(function(r) {{
+    var d = r.delta_petro_1v_pp_pct;
+    var color = d > -4 ? '#d32f2f' : d > -5.5 ? '#e57373' : '#ffcdd2';
+    var sit = (r.sit_vs_1v22 || '').includes('GANA') ? '🌸 Gana en votos' : '🔴 Pierde en votos';
+    return '<tr>' +
+      '<td><strong>' + r.Localidad + '</strong></td>' +
+      '<td>' + (r.pct_petro_1v22 !== undefined ? (r.pct_petro_1v22 * 100).toFixed(1) + '%' : '-') + '</td>' +
+      '<td>' + (r.pct_cepeda_1v26 !== undefined ? (r.pct_cepeda_1v26 * 100).toFixed(1) + '%' : '-') + '</td>' +
+      '<td style="font-weight:600;color:' + color + '">' + (d > 0 ? '+' : '') + d.toFixed(1) + ' pp</td>' +
+      '<td style="text-align:right">' + Number(r.votos_petro_1v22).toLocaleString() + '</td>' +
+      '<td style="text-align:right">' + Number(r.votos_cepeda_1v26).toLocaleString() + '</td>' +
+      '<td>' + sit + '</td>' +
+      '</tr>';
+  }}).join('');
+}}
+
+function sortComp(col) {{
+  var keys = ['Localidad', 'pct_petro_1v22', 'pct_cepeda_1v26', 'delta_petro_1v_pp_pct', 'votos_petro_1v22', 'votos_cepeda_1v26', 'sit_vs_1v22'];
+  var key = keys[col];
+  compData.sort(function(a,b) {{
+    var va = a[key], vb = b[key];
+    if (typeof va === 'number') return va - vb;
+    return String(va).localeCompare(String(vb));
+  }});
+  renderComp();
+}}
+
+// Summary stats for comparativo
+var mejor = compData[compData.length - 1];
+var peor = compData[0];
+var gana = compData.filter(function(r) {{ return (r.sit_vs_1v22 || '').includes('GANA'); }}).length;
+document.getElementById('comp-mejor').textContent = mejor.Localidad + ' (' + mejor.delta_petro_1v_pp_pct.toFixed(1) + ' pp)';
+document.getElementById('comp-peor').textContent = peor.Localidad + ' (' + peor.delta_petro_1v_pp_pct.toFixed(1) + ' pp)';
+document.getElementById('comp-gana').textContent = gana + ' de ' + compData.length;
+
+renderComp();
 </script>
 </body>
 </html>"""
