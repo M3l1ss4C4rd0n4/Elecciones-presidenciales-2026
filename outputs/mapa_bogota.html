@@ -251,12 +251,26 @@
     attribution:'&copy; <a href="https://carto.com">CARTO</a>', subdomains:'abcd', maxZoom:19
   }).addTo(map);
 
-  // ─── PUESTOS LAYER (placeholder, loaded from external GeoJSON) ───
+  // ─── PUESTOS LAYER ───
+  function setPuestosMode(on) {
+    // Toggle polygon interactivity so clicks reach circle markers
+    [upzLayer, locLayer].forEach(function(layer) {
+      layer.eachLayer(function(l) {
+        if (l._path) l._path.style.pointerEvents = on ? 'none' : '';
+        if (on) {
+          l.setStyle({ fillOpacity:0.08, weight:0.3, color:'#ccc' });
+        } else {
+          applyStyle(l);
+        }
+      });
+    });
+  }
+
   window.togglePuestos = function() {
     var checked = document.getElementById('toggle-puestos').checked;
     if (checked) {
+      setPuestosMode(true);
       if (!puestosLayer) {
-        // Load puestos data - will be populated in Fase 3
         fetch('puestos_con_votos.geojson')
           .then(function(r) { return r.json(); })
           .then(function(data) {
@@ -264,14 +278,16 @@
             map.addLayer(puestosLayer);
           })
           .catch(function() {
-            // Fallback: no puestos data yet
             document.getElementById('toggle-puestos').checked = false;
+            setPuestosMode(false);
           });
       } else {
         map.addLayer(puestosLayer);
       }
     } else {
-      if (puestosLayer) map.removeLayer(puestosLayer);
+      setPuestosMode(false);
+      if (puestosLayer) { map.removeLayer(puestosLayer); }
+      updateMap(); // restore polygon styles
     }
   };
 
@@ -678,15 +694,9 @@
       currentView = this.dataset.view;
       if (currentView === 'loc') { map.removeLayer(upzLayer); map.addLayer(locLayer); }
       else { map.removeLayer(locLayer); map.addLayer(upzLayer); }
+      if (document.getElementById('toggle-puestos').checked) setPuestosMode(true);
       updateMap();
     });
-  });
-
-  // Update puestos layer style when mode changes (if active)
-  document.getElementById('toggle-puestos').addEventListener('change', function() {
-    if (this.checked && puestosLayer) {
-      map.addLayer(puestosLayer);
-    }
   });
 
   // Initially hide cand section (winner mode)
