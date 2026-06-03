@@ -752,10 +752,10 @@ function initChart(id) {
     tooltip: { position:'top', formatter: function(p) {
       return candNames[p.data[1]] + ' en ' + locList[p.data[0]] + ': <strong>' + p.data[2] + '%</strong>';
     } },
-    grid: { left:130, right:40, top:20, bottom:60 },
+    grid: { left:130, right:70, top:20, bottom:40 },
     xAxis: { type:'category', data: locList, axisLabel:{ rotate:45, fontSize:10, width:80, overflow:'break' }, splitArea:{ show:true } },
     yAxis: { type:'category', data: candNames, axisLabel:{ fontSize:10, fontWeight:500 } },
-    visualMap: { min:0, max:70, calculable:true, orient:'horizontal', left:'center', bottom:0,
+    visualMap: { min:0, max:70, calculable:true, orient:'vertical', right:10, top:20, bottom:40,
       inRange: { color: ['#f7f7f7','#dadaeb','#9e9ac8','#6a51a3','#3f007d'] },
       textStyle:{ fontSize:10 } },
     series: [{
@@ -828,8 +828,8 @@ function initChart(id) {
       ps.forEach(function(p) { html += p.marker + ' ' + p.seriesName + ': ' + (p.seriesType === 'bar' ? p.value + '%' : p.value + ' pp') + '<br>'; });
       return html;
     } },
-    legend: { data: ['% Petro 2022', '% Cepeda 2026', 'Delta (pp)'], bottom:0, itemWidth:10, itemHeight:10, textStyle:{ fontSize:11 } },
-    grid: { left:60, right:60, top:15, bottom:40 },
+    legend: { data: ['% Petro 2022', '% Cepeda 2026', 'Delta (pp)'], top:0, left:'center', itemWidth:10, itemHeight:10, textStyle:{ fontSize:11 } },
+    grid: { left:60, right:60, top:40, bottom:50 },
     xAxis: { type:'category', data: locs, axisLabel:{ rotate:45, fontSize:9, width:70, overflow:'break' } },
     yAxis: [
       { type:'value', name:'%', nameTextStyle:{ fontSize:11, color:'#616161' }, splitLine:{ lineStyle:{ color:'#f0f0f0' } } },
