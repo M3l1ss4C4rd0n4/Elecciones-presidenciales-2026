@@ -563,7 +563,7 @@ renderTable(tableData);
 var compPairIdx = 0;
 
 function getCompPrefix(idx) {{
-  return compPairs[idx].replace(/[^a-z0-9]/gi, '_').replace(/vs/g, 'vs') + '_';
+  return compPairs[idx] + '_';
 }}
 
 function renderComp() {{
@@ -814,7 +814,7 @@ function initChart(id) {{
   var heatData = [];
   fullComp.forEach(function(r, i) {{
     compPairs.forEach(function(p, j) {{
-      var prefix = p.replace(/[^a-z0-9]/gi, '_').replace(/vs/g, 'vs') + '_';
+      var prefix = p + '_';
       var d = r[prefix + 'delta'] || 0;
       heatData.push([j, i, d]);
     }});
@@ -844,7 +844,7 @@ function initChart(id) {{
 (function() {{
   var chart = initChart('chart-comp-box');
   var series = compPairs.map(function(p) {{
-    var prefix = p.replace(/[^a-z0-9]/gi, '_').replace(/vs/g, 'vs') + '_';
+    var prefix = p + '_';
     var vals = fullComp.map(function(r) {{ return r[prefix + 'delta'] || 0; }}).sort(function(a,b) {{ return a-b; }});
     return {{
       name: p.split(' vs ').join(' '),
