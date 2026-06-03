@@ -638,6 +638,7 @@ var chartTheme = {{
 }};
 echarts.registerTheme('colombia', chartTheme);
 
+var allCharts = [];
 function initChart(id) {{
   var dom = document.getElementById(id);
   if (!dom) return {{ setOption:function(){{}}, resize:function(){{}} }};
@@ -889,7 +890,6 @@ function initChart(id) {{
 }})();
 
 // ─── SPA TAB NAV ───
-var allCharts = [];
 var loadedIframes = {{}};
 function switchSection(id) {{
   document.querySelectorAll('.section').forEach(function(s) {{ s.classList.remove('active'); }});
