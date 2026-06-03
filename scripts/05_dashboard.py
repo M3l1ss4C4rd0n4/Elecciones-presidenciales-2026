@@ -255,11 +255,11 @@ renderTable(tableData);
 </body>
 </html>"""
 
-dashboard_path = os.path.join(OUT, 'dashboard.html')
+dashboard_path = os.path.join(OUT, 'index.html')
 with open(dashboard_path, 'w', encoding='utf-8') as f:
     f.write(html)
 
-print(f'  OK  {dashboard_path}')
+print(f'  OK  {dashboard_path} (se sirve como index.html en la raiz)')
 print(f'      - Mapa interactivo (4 modos: ganador, relativo, %, diferencia)')
 print(f'      - 4 graficos PNG')
 print(f'      - Tabla completa con busqueda + ordenamiento')
