@@ -46,6 +46,7 @@ PURPLES = ['#F2F0F7','#DADAEB','#BCBDDC','#9E9AC8','#807DBA','#6A51A3','#54278F'
 # ─── TIPOGRAFIA ───
 FONT_FAMILY = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
 FONT_MONO = "'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace"
+FONT_MONO_JS = FONT_MONO.replace("'", "\\'")
 
 # ─── CSS SHARED (componentes base) ───
 CSS_RESET = """

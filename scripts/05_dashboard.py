@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import os, json, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _theme import P, CAND_COLORS, FONT_FAMILY, FONT_MONO
+from _theme import P, CAND_COLORS, FONT_FAMILY, FONT_MONO, FONT_MONO_JS
 from _theme import CSS_RESET, CSS_CARD, CSS_BUTTON, CSS_INPUT, CSS_TABLE, CSS_BADGE, CSS_STAT_CARD, CSS_SECTION_NAV, CSS_ANIMATIONS, BP
 from _theme import YLORRD, RDBU, PURPLES
 from _utils import fix_name
@@ -514,16 +514,16 @@ function renderTable(data) {{
   tbody.innerHTML = data.map(function(r) {{
     var catClass = 'badge badge-' + (r.cat === 'Seguro' ? 'success' : r.cat === 'Competido' ? 'warning' : 'error');
     return '<tr>' +
-      '<td style="font-family:{FONT_MONO};font-size:12px;color:{P['text-secondary']}">' + r.cod + '</td>' +
+      '<td style="font-family:{FONT_MONO_JS};font-size:12px;color:{P['text-secondary']}">' + r.cod + '</td>' +
       '<td><strong>' + r.nom + '</strong></td>' +
       '<td>' + r.loc + '</td>' +
-      '<td style="text-align:right;font-family:{FONT_MONO}">' + r.total.toLocaleString() + '</td>' +
+      '<td style="text-align:right;font-family:{FONT_MONO_JS}">' + r.total.toLocaleString() + '</td>' +
       '<td><span style="display:inline-block;width:10px;height:10px;border-radius:2px;' +
         'background:' + (candColors[r.ganador] || '#ccc') + ';margin-right:6px"></span>' + r.ganador + '</td>' +
-      '<td style="text-align:right;font-family:{FONT_MONO}">' + r.pct_g + '%</td>' +
+      '<td style="text-align:right;font-family:{FONT_MONO_JS}">' + r.pct_g + '%</td>' +
       '<td>' + r.segundo + '</td>' +
-      '<td style="text-align:right;font-family:{FONT_MONO}">' + r.diff.toLocaleString() + '</td>' +
-      '<td style="text-align:right;font-family:{FONT_MONO}">' + r.margen.toFixed(1) + '%' +
+      '<td style="text-align:right;font-family:{FONT_MONO_JS}">' + r.diff.toLocaleString() + '</td>' +
+      '<td style="text-align:right;font-family:{FONT_MONO_JS}">' + r.margen.toFixed(1) + '%' +
         '<div style="height:4px;border-radius:2px;background:{P['border-light']};margin-top:4px;overflow:hidden">' +
         '<div style="height:100%;width:' + Math.min(r.margen * 3, 100) + '%;background:{P['primary']};border-radius:2px"></div></div></td>' +
       '<td><span class="' + catClass + '">' + r.cat + '</span></td>' +
@@ -593,15 +593,15 @@ function renderComp() {{
     var barColor = r.delta > 0 ? '{P['success']}' : '{P['error']}';
     return '<tr>' +
       '<td><strong>' + r.loc + '</strong></td>' +
-      '<td style="text-align:right;font-family:{FONT_MONO}">' + r.pct22.toFixed(1) + '%</td>' +
-      '<td style="text-align:right;font-family:{FONT_MONO}">' + r.pct26.toFixed(1) + '%</td>' +
-      '<td style="font-family:{FONT_MONO}">' +
+      '<td style="text-align:right;font-family:{FONT_MONO_JS}">' + r.pct22.toFixed(1) + '%</td>' +
+      '<td style="text-align:right;font-family:{FONT_MONO_JS}">' + r.pct26.toFixed(1) + '%</td>' +
+      '<td style="font-family:{FONT_MONO_JS}">' +
         '<div style="display:flex;align-items:center;gap:8px">' +
         '<span style="font-weight:600;color:' + barColor + ';min-width:45px">' + (r.delta > 0 ? '+' : '') + r.delta.toFixed(1) + ' pp</span>' +
         '<div style="flex:1;height:8px;border-radius:4px;background:{P['border-light']};overflow:hidden">' +
         '<div style="height:100%;width:' + barPct + '%;background:' + barColor + ';border-radius:4px;transition:width 0.5s"></div></div></div></td>' +
-      '<td style="text-align:right;font-family:{FONT_MONO}">-</td>' +
-      '<td style="text-align:right;font-family:{FONT_MONO}">-</td>' +
+      '<td style="text-align:right;font-family:{FONT_MONO_JS}">-</td>' +
+      '<td style="text-align:right;font-family:{FONT_MONO_JS}">-</td>' +
       '<td><span style="color:' + barColor + ';font-weight:500">' + r.sit + '</span></td>' +
       '</tr>';
   }}).join('');
@@ -648,6 +648,7 @@ echarts.registerTheme('colombia', chartTheme);
 
 function initChart(id) {{
   var dom = document.getElementById(id);
+  if (!dom) return {{ setOption:function(){{}}, resize:function(){{}} }};
   var chart = echarts.init(dom, 'colombia', {{ renderer: 'canvas' }});
   return chart;
 }}
