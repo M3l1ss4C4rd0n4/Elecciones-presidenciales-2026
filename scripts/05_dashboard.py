@@ -162,6 +162,30 @@ for r in comp_loc:
 full_comp_json = json.dumps(full_comp, ensure_ascii=False)
 comp_pairs_json = json.dumps([p[0] for p in COMP_PAIRS], ensure_ascii=False)
 
+# ─── RESUMEN KPIs ───
+g_name, g_votos, g_pct = cand_order[0], stats_cand[0]['v'], stats_cand[0]['p']
+s_name, s_votos, s_pct = cand_order[1], stats_cand[1]['v'], stats_cand[1]['p']
+dif_votos = g_votos - s_votos
+dif_pp = round(g_pct - s_pct, 1)
+
+upz_cepeda = sum(1 for r in resumen if r['ganador'] == cand_order[0])
+upz_espriella = sum(1 for r in resumen if r['ganador'] == cand_order[1])
+upz_otros = total_upzs - upz_cepeda - upz_espriella
+
+upz_seg = sum(1 for r in resumen if r['cat'] == 'Seguro')
+upz_comp = sum(1 for r in resumen if r['cat'] == 'Competido')
+upz_emp = sum(1 for r in resumen if r['cat'] == 'Empate')
+
+max_b = max(resumen, key=lambda r: r['margen'])
+min_b = min(resumen, key=lambda r: r['margen'])
+top_v = max(resumen, key=lambda r: r['total'])
+avg_margen = round(sum(r['margen'] for r in resumen) / total_upzs, 1)
+
+avg_petro22 = round(np.mean([r['pct_petro_1v22'] for r in comp_loc]) * 100, 1)
+avg_cepeda26 = round(np.mean([r['pct_cepeda_1v26'] for r in comp_loc]) * 100, 1)
+comp_delta = round(avg_cepeda26 - avg_petro22, 1)
+loc_retro = sum(1 for r in comp_loc if r['delta_petro_1v_pp_pct'] < 0)
+
 # ─── CONSTANTES TEMPLATE ───
 ESTILOS = CSS_RESET + CSS_CARD + CSS_BUTTON + CSS_INPUT + CSS_TABLE + CSS_BADGE + CSS_STAT_CARD + CSS_SECTION_NAV + CSS_ANIMATIONS
 
@@ -230,6 +254,24 @@ body {{ padding-bottom:48px; }}
 
 /* Sticky nav */
 .section-nav-wrap {{ position:sticky; top:0; z-index:100; margin-bottom:24px; }}
+
+/* Resumen KPI extras */
+.kpi-detail {{ font-size:12px; color:{P['text-secondary']}; margin-top:8px; padding-top:8px; border-top:1px solid {P['border-light']}; }}
+.kpi-row {{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; }}
+.kpi-row .kpi-label {{ font-size:11px; color:{P['text-secondary']}; }}
+.kpi-row .kpi-val {{ font-size:12px; font-weight:600; font-family:{FONT_MONO_JS}; }}
+.kpi-bar-group {{ margin-top:8px; }}
+.kpi-bar-item {{ display:flex; align-items:center; gap:8px; margin-bottom:4px; font-size:11px; color:{P['text-secondary']}; }}
+.kpi-bar-track {{ flex:1; height:6px; border-radius:3px; background:{P['border-light']}; overflow:hidden; }}
+.kpi-bar-fill {{ height:100%; border-radius:3px; transition:width 0.6s ease; }}
+.insight-card {{ background:white; border-radius:12px; padding:20px; border:1px solid {P['border-light']}; box-shadow:0 1px 3px {P['shadow']}; }}
+.insight-card .insight-title {{ font-size:13px; font-weight:600; color:{P['text']}; margin-bottom:12px; display:flex; align-items:center; gap:6px; }}
+.insight-card .insight-row {{ display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid {P['border-light']}; font-size:12px; }}
+.insight-card .insight-row:last-child {{ border:none; }}
+.insight-card .insight-label {{ color:{P['text-secondary']}; }}
+.insight-card .insight-val {{ font-weight:600; color:{P['text']}; font-family:{FONT_MONO_JS}; }}
+.insights-grid {{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }}
+@media (max-width:{BP['md']}) {{ .insights-grid {{ grid-template-columns:1fr; }} }}
 </style>
 </head>
 <body>
@@ -261,35 +303,144 @@ body {{ padding-bottom:48px; }}
   <div class="stats-grid">
     <div class="stat-card anim-fade-up anim-delay-1">
       <div class="stat-icon primary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 22V2l4 4-4 4"/></svg>
       </div>
-      <div class="stat-num">{total_votos:,}</div>
-      <div class="stat-label">Votos procesados</div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:{P['primary']}"></div></div>
+      <div class="stat-label" style="font-size:11px;margin-bottom:2px">Ganador en Bogota</div>
+      <div class="stat-num">{g_pct}%</div>
+      <div style="font-weight:600;font-size:14px;color:{P['text']}">{g_name}</div>
+      <div class="kpi-detail">
+        <div class="kpi-row">
+          <span class="kpi-label">vs {s_name}</span>
+          <span class="kpi-val" style="color:{P['primary']}">+{dif_pp} pp</span>
+        </div>
+        <div class="kpi-row">
+          <span class="kpi-label">{g_votos:,} votos</span>
+          <span class="kpi-label">Dif: {dif_votos:,}</span>
+        </div>
+      </div>
     </div>
     <div class="stat-card anim-fade-up anim-delay-2">
       <div class="stat-icon accent">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
       </div>
-      <div class="stat-num">{total_upzs}</div>
-      <div class="stat-label">UPZs</div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:{P['accent']}"></div></div>
+      <div class="stat-label" style="font-size:11px;margin-bottom:2px">UPZs ganadas</div>
+      <div class="kpi-bar-group">
+        <div class="kpi-bar-item">
+          <span style="color:{CAND_COLORS[0]};font-weight:600;min-width:72px">Cepeda</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:{upz_cepeda/total_upzs*100:.0f}%;background:{CAND_COLORS[0]}"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">{upz_cepeda}</span>
+        </div>
+        <div class="kpi-bar-item">
+          <span style="color:{CAND_COLORS[1]};font-weight:600;min-width:72px">Espriella</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:{upz_espriella/total_upzs*100:.0f}%;background:{CAND_COLORS[1]}"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">{upz_espriella}</span>
+        </div>
+      </div>
+      <div class="kpi-detail">
+        <span class="kpi-label">{total_upzs} UPZs &middot; {total_localidades} localidades</span>
+      </div>
     </div>
     <div class="stat-card anim-fade-up anim-delay-3">
       <div class="stat-icon success">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
       </div>
-      <div class="stat-num">{total_localidades}</div>
-      <div class="stat-label">Localidades</div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:{total_localidades/20*100}%;background:{P['success']}"></div></div>
+      <div class="stat-label" style="font-size:11px;margin-bottom:2px">Competitividad</div>
+      <div class="kpi-bar-group">
+        <div class="kpi-bar-item">
+          <span style="min-width:80px">Seguras (&ge;20pp)</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:{upz_seg/total_upzs*100:.0f}%;background:{P['success']}"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">{upz_seg}</span>
+        </div>
+        <div class="kpi-bar-item">
+          <span style="min-width:80px">Competidas</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:{upz_comp/total_upzs*100:.0f}%;background:{P['warning']}"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">{upz_comp}</span>
+        </div>
+        <div class="kpi-bar-item">
+          <span style="min-width:80px">Empate (&lt;5pp)</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:{upz_emp/total_upzs*100:.0f}%;background:{P['accent']}"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">{upz_emp}</span>
+        </div>
+      </div>
+      <div class="kpi-detail">
+        <span class="kpi-label">Margen promedio: {avg_margen} pp</span>
+      </div>
     </div>
     <div class="stat-card anim-fade-up anim-delay-4">
       <div class="stat-icon warning">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       </div>
-      <div class="stat-num">{total_candidatos}</div>
-      <div class="stat-label">Candidatos</div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:{P['warning']}"></div></div>
+      <div class="stat-label" style="font-size:11px;margin-bottom:2px">Comparativo 2022 vs 2026</div>
+      <div class="kpi-bar-group">
+        <div class="kpi-bar-item">
+          <span style="min-width:78px">Petro 2022</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:{avg_petro22}%;background:{P['primary']}"></div></div>
+          <span style="font-weight:600;min-width:40px;text-align:right">{avg_petro22}%</span>
+        </div>
+        <div class="kpi-bar-item">
+          <span style="min-width:78px">Cepeda 2026</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:{avg_cepeda26}%;background:{P['accent']}"></div></div>
+          <span style="font-weight:600;min-width:40px;text-align:right">{avg_cepeda26}%</span>
+        </div>
+      </div>
+      <div class="kpi-detail">
+        <div class="kpi-row">
+          <span class="kpi-label" style="color:{P['error']}">Delta: {comp_delta} pp</span>
+          <span class="kpi-label">{loc_retro}/{total_localidades} localidades retroceden</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insights-grid">
+    <div class="insight-card anim-fade-up anim-delay-1">
+      <div class="insight-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{P['warning']}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Extremos
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Mayor brecha</span>
+        <span class="insight-val">{max_b['nom']} ({max_b['margen']} pp)</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">UPZ mas reñida</span>
+        <span class="insight-val">{min_b['nom']} ({min_b['margen']}%)</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Mas votos</span>
+        <span class="insight-val">{top_v['nom']} ({top_v['total']:,})</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Margen promedio</span>
+        <span class="insight-val">{avg_margen} pp</span>
+      </div>
+    </div>
+    <div class="insight-card anim-fade-up anim-delay-2">
+      <div class="insight-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{P['primary']}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Panorama general
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Votos procesados</span>
+        <span class="insight-val">{total_votos:,}</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">UPZs / Localidades</span>
+        <span class="insight-val">{total_upzs} / {total_localidades}</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Candidatos</span>
+        <span class="insight-val">{total_candidatos}</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">UPZs seguras</span>
+        <span class="insight-val">{upz_seg} de {total_upzs} ({upz_seg/total_upzs*100:.0f}%)</span>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:{P['text-secondary']};line-height:1.5;padding-top:10px;border-top:1px solid {P['border-light']}">
+        Cepeda gana en Bogota con {g_pct}% ({g_votos:,} votos), superando a Espriella por {dif_pp} pp.
+        Domina en {upz_cepeda} UPZs ({upz_cepeda/total_upzs*100:.0f}%), principalmente en el sur y occidente.
+        Comparado con Petro 2022, el voto de izquierda cae {comp_delta} pp en todas las localidades.
+      </div>
     </div>
   </div>
 </section>

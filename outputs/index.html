@@ -154,6 +154,24 @@ body { padding-bottom:48px; }
 
 /* Sticky nav */
 .section-nav-wrap { position:sticky; top:0; z-index:100; margin-bottom:24px; }
+
+/* Resumen KPI extras */
+.kpi-detail { font-size:12px; color:#616161; margin-top:8px; padding-top:8px; border-top:1px solid #F0F0F0; }
+.kpi-row { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+.kpi-row .kpi-label { font-size:11px; color:#616161; }
+.kpi-row .kpi-val { font-size:12px; font-weight:600; font-family:\'JetBrains Mono\', \'Cascadia Code\', \'Fira Code\', monospace; }
+.kpi-bar-group { margin-top:8px; }
+.kpi-bar-item { display:flex; align-items:center; gap:8px; margin-bottom:4px; font-size:11px; color:#616161; }
+.kpi-bar-track { flex:1; height:6px; border-radius:3px; background:#F0F0F0; overflow:hidden; }
+.kpi-bar-fill { height:100%; border-radius:3px; transition:width 0.6s ease; }
+.insight-card { background:white; border-radius:12px; padding:20px; border:1px solid #F0F0F0; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.insight-card .insight-title { font-size:13px; font-weight:600; color:#212121; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.insight-card .insight-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F0F0F0; font-size:12px; }
+.insight-card .insight-row:last-child { border:none; }
+.insight-card .insight-label { color:#616161; }
+.insight-card .insight-val { font-weight:600; color:#212121; font-family:\'JetBrains Mono\', \'Cascadia Code\', \'Fira Code\', monospace; }
+.insights-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+@media (max-width:768px) { .insights-grid { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -185,35 +203,144 @@ body { padding-bottom:48px; }
   <div class="stats-grid">
     <div class="stat-card anim-fade-up anim-delay-1">
       <div class="stat-icon primary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 22V2l4 4-4 4"/></svg>
       </div>
-      <div class="stat-num">3,952,417</div>
-      <div class="stat-label">Votos procesados</div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:#B71C1C"></div></div>
+      <div class="stat-label" style="font-size:11px;margin-bottom:2px">Ganador en Bogota</div>
+      <div class="stat-num">42.4%</div>
+      <div style="font-weight:600;font-size:14px;color:#212121">IVÁN CEPEDA CASTRO</div>
+      <div class="kpi-detail">
+        <div class="kpi-row">
+          <span class="kpi-label">vs ABELARDO DE LA ESPRIELLA</span>
+          <span class="kpi-val" style="color:#B71C1C">+4.1 pp</span>
+        </div>
+        <div class="kpi-row">
+          <span class="kpi-label">1,675,622 votos</span>
+          <span class="kpi-label">Dif: 161,841</span>
+        </div>
+      </div>
     </div>
     <div class="stat-card anim-fade-up anim-delay-2">
       <div class="stat-icon accent">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
       </div>
-      <div class="stat-num">110</div>
-      <div class="stat-label">UPZs</div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:#1565C0"></div></div>
+      <div class="stat-label" style="font-size:11px;margin-bottom:2px">UPZs ganadas</div>
+      <div class="kpi-bar-group">
+        <div class="kpi-bar-item">
+          <span style="color:#E53935;font-weight:600;min-width:72px">Cepeda</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:55%;background:#E53935"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">60</span>
+        </div>
+        <div class="kpi-bar-item">
+          <span style="color:#1E88E5;font-weight:600;min-width:72px">Espriella</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:45%;background:#1E88E5"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">50</span>
+        </div>
+      </div>
+      <div class="kpi-detail">
+        <span class="kpi-label">110 UPZs &middot; 20 localidades</span>
+      </div>
     </div>
     <div class="stat-card anim-fade-up anim-delay-3">
       <div class="stat-icon success">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
       </div>
-      <div class="stat-num">20</div>
-      <div class="stat-label">Localidades</div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:100.0%;background:#2E7D32"></div></div>
+      <div class="stat-label" style="font-size:11px;margin-bottom:2px">Competitividad</div>
+      <div class="kpi-bar-group">
+        <div class="kpi-bar-item">
+          <span style="min-width:80px">Seguras (&ge;20pp)</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:51%;background:#2E7D32"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">56</span>
+        </div>
+        <div class="kpi-bar-item">
+          <span style="min-width:80px">Competidas</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:30%;background:#E65100"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">33</span>
+        </div>
+        <div class="kpi-bar-item">
+          <span style="min-width:80px">Empate (&lt;5pp)</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:19%;background:#1565C0"></div></div>
+          <span style="font-weight:600;min-width:30px;text-align:right">21</span>
+        </div>
+      </div>
+      <div class="kpi-detail">
+        <span class="kpi-label">Margen promedio: 21.0 pp</span>
+      </div>
     </div>
     <div class="stat-card anim-fade-up anim-delay-4">
       <div class="stat-icon warning">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       </div>
-      <div class="stat-num">13</div>
-      <div class="stat-label">Candidatos</div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:#E65100"></div></div>
+      <div class="stat-label" style="font-size:11px;margin-bottom:2px">Comparativo 2022 vs 2026</div>
+      <div class="kpi-bar-group">
+        <div class="kpi-bar-item">
+          <span style="min-width:78px">Petro 2022</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:50.9%;background:#B71C1C"></div></div>
+          <span style="font-weight:600;min-width:40px;text-align:right">50.9%</span>
+        </div>
+        <div class="kpi-bar-item">
+          <span style="min-width:78px">Cepeda 2026</span>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:45.4%;background:#1565C0"></div></div>
+          <span style="font-weight:600;min-width:40px;text-align:right">45.4%</span>
+        </div>
+      </div>
+      <div class="kpi-detail">
+        <div class="kpi-row">
+          <span class="kpi-label" style="color:#C62828">Delta: -5.5 pp</span>
+          <span class="kpi-label">20/20 localidades retroceden</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insights-grid">
+    <div class="insight-card anim-fade-up anim-delay-1">
+      <div class="insight-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E65100" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Extremos
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Mayor brecha</span>
+        <span class="insight-val">UPR RIO SUMAPAZ (96.3 pp)</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">UPZ mas reñida</span>
+        <span class="insight-val">CAPELLANIA (0.0%)</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Mas votos</span>
+        <span class="insight-val">BOSA CENTRAL (147,589)</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Margen promedio</span>
+        <span class="insight-val">21.0 pp</span>
+      </div>
+    </div>
+    <div class="insight-card anim-fade-up anim-delay-2">
+      <div class="insight-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B71C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Panorama general
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Votos procesados</span>
+        <span class="insight-val">3,952,417</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">UPZs / Localidades</span>
+        <span class="insight-val">110 / 20</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">Candidatos</span>
+        <span class="insight-val">13</span>
+      </div>
+      <div class="insight-row">
+        <span class="insight-label">UPZs seguras</span>
+        <span class="insight-val">56 de 110 (51%)</span>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:#616161;line-height:1.5;padding-top:10px;border-top:1px solid #F0F0F0">
+        Cepeda gana en Bogota con 42.4% (1,675,622 votos), superando a Espriella por 4.1 pp.
+        Domina en 60 UPZs (55%), principalmente en el sur y occidente.
+        Comparado con Petro 2022, el voto de izquierda cae -5.5 pp en todas las localidades.
+      </div>
     </div>
   </div>
 </section>
