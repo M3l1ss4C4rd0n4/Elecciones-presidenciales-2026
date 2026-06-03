@@ -88,6 +88,13 @@ upz_geo_4326['MARGEN_PCT'] = np.where(
 cand_colors_dict = dict(zip(cand_order, CAND_COLORS[:len(cand_order)]))
 upz_geo_4326['COLOR_GANADOR'] = upz_geo_4326['GANADOR'].map(cand_colors_dict)
 
+# Mark UPZs without data (0 total votes)
+sin_datos_mask = upz_geo_4326[total_col] == 0
+upz_geo_4326.loc[sin_datos_mask, 'GANADOR'] = 'Sin datos'
+upz_geo_4326.loc[sin_datos_mask, 'SEGUNDO'] = 'Sin datos'
+upz_geo_4326.loc[sin_datos_mask, 'COLOR_GANADOR'] = '#e0e0e0'
+upz_geo_4326.loc[sin_datos_mask, 'MARGEN_PCT'] = 0.0
+
 cand_ranges = {cand: {'min': float(upz_geo_4326[cand].min()), 'max': float(upz_geo_4326[cand].max())} for cand in cand_order}
 global_max_votos = float(upz_geo_4326[cand_order].values.max())
 
@@ -103,6 +110,17 @@ def make_popup(props, is_loc=False):
     uplnombre = props.get('UPLNOMBRE', '')
     locnombre = props.get('LOCNOMBRE', '')
     total = int(props.get(total_col, 0) or 0)
+
+    if total == 0:
+        label = ' (Localidad)' if is_loc else ''
+        return (
+            f'<div class="pp">'
+            f'<div class="pp-header"><span class="pp-title">{uplnombre}{label}</span>'
+            f'<span class="pp-subtitle">{locnombre}</span></div>'
+            f'<div style="padding:24px;text-align:center;font-size:13px;color:{P["text-secondary"]}">'
+            f'Sin datos electorales para esta zona</div></div>'
+        )
+
     rows = []
     for cand in cand_order:
         v = int(props.get(cand, 0) or 0)
@@ -539,6 +557,11 @@ html = f"""<!DOCTYPE html>
   }}
 
   function buildTooltip(p) {{
+    if (!p.TOTAL_VOTOS) {{
+      return '<div class="tt-name">' + (p.UPLNOMBRE || p.LOCNOMBRE || '') + '</div>' +
+        (currentView === 'upz' && p.LOCNOMBRE ? '<div class="tt-sub">'+p.LOCNOMBRE+'</div>' : '') +
+        '<div class="tt-val" style="color:#9E9E9E">Sin datos electorales</div>';
+    }}
     var sel = selectedCands;
     var mode = currentMode;
     var name = p.UPLNOMBRE || p.LOCNOMBRE || '';
@@ -630,6 +653,12 @@ html = f"""<!DOCTYPE html>
       else if (d >= 0) {{ idx = Math.min(4 + Math.floor((d / (maxD||1)) * 4), 8); }}
       else {{ idx = Math.max(0, 4 - Math.floor((d - minD) / (-(minD||1)) * 4)); }}
       style.fillColor = rdbu[Math.max(0, Math.min(Math.round(idx), 8))];
+      layer.setStyle(style);
+      return;
+    }}
+
+    if (!p.TOTAL_VOTOS) {{
+      style.fillColor = '#e0e0e0'; style.fillOpacity = 0.15;
       layer.setStyle(style);
       return;
     }}
@@ -779,6 +808,9 @@ html = f"""<!DOCTYPE html>
             c.split(' ').slice(0,2).join(' ') + ' <span class="legend-count">'+counts[c]+'</span></div>';
         }}
       }});
+      if (counts['Sin datos']) {{
+        html += '<div class="legend-item"><span class="legend-swatch" style="background:#e0e0e0"></span> Sin datos <span class="legend-count">'+counts['Sin datos']+'</span></div>';
+      }}
       html += '</div>';
       el.innerHTML = html;
       bar.style.display = 'none'; labels.style.display = 'none';
