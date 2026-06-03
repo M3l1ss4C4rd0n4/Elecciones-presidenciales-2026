@@ -248,7 +248,6 @@ body {{ padding-bottom:48px; }}
     <a href="#mapa">Mapa</a>
     <a href="#graficos">Graficos</a>
     <a href="#detalle">Detalle UPZ</a>
-    <a href="#minimapas">Candidatos</a>
     <a href="#comparativo">Comparativo 22-26</a>
   </nav>
 </div>
@@ -384,18 +383,6 @@ body {{ padding-bottom:48px; }}
         <tbody id="table-body"></tbody>
       </table>
     </div>
-  </div>
-</section>
-
-<!-- ═══ SMALL MULTIPLES ═══ -->
-<section id="minimapas" class="section">
-  <div class="section-title">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{P['primary']}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    Todos los candidatos
-    <span class="badge badge-primary">13 mini-mapas</span>
-  </div>
-  <div class="full-card" style="padding:0;overflow:hidden">
-    <iframe src="small_multiples.html" style="width:100%;height:460px;border:none" title="Small multiples de candidatos"></iframe>
   </div>
 </section>
 
