@@ -297,13 +297,29 @@
       },
       onEachFeature: function(feature, layer) {
         var p = feature.properties;
-        layer.bindTooltip('<div class="tt-name">' + (p.NOMBRE || 'Puesto') + '</div>' +
-          '<div class="tt-sub">Ganador: ' + p.GANADOR + '</div>' +
-          '<div class="tt-val">' + Number(p.TOTAL_VOTOS).toLocaleString() + ' votos</div>');
-        var popupContent = '<div class="pp"><div class="pp-header"><span class="pp-title">' +
-          (p.NOMBRE || 'Puesto') + '</span><span class="pp-subtitle">' +
-          (p.DIRECCION || '') + '</span></div></div>';
-        layer.bindPopup(popupContent);
+        var nom = p.NOMBRE || 'Puesto';
+        var gan = p.GANADOR || 'N/A';
+        var total = Number(p.TOTAL_VOTOS || 0);
+        var vg = Number(p.VOTOS_GANADOR || 0);
+        var pct = Number(p.PCT_GANADOR || 0);
+        var dir = p.DIRECCION || '';
+        var loc = p.LOCALIDAD || '';
+        var color = candColors[gan] || '#ccc';
+        layer.bindTooltip('<div class="tt-name">' + nom + '</div>' +
+          '<div class="tt-sub">' + loc + '</div>' +
+          '<div class="tt-val">' + gan + '</div>' +
+          '<div class="tt-total">' + total.toLocaleString() + ' votos &middot; ' + pct.toFixed(1) + '%</div>', {
+          sticky: true, direction:'top', offset:L.point(0,-8)
+        });
+        var popupContent = '<div class="pp"><div class="pp-header"><span class="pp-title">' + nom +
+          '</span><span class="pp-subtitle">' + dir + '</span></div>' +
+          '<div style="padding:12px 16px">' +
+          '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0F0F0;font-size:12px"><span style="color:#757575">Localidad</span><span style="font-weight:600;color:#333">' + loc + '</span></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0F0F0;font-size:12px"><span style="color:#757575">Ganador</span><span style="font-weight:600;color:' + color + '">' + gan + '</span></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0F0F0;font-size:12px"><span style="color:#757575">Total votos</span><span style="font-weight:600;font-family:JetBrains Mono,monospace;color:#333">' + total.toLocaleString() + '</span></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span style="color:#757575">Votos ganador</span><span style="font-weight:600;font-family:JetBrains Mono,monospace;color:#333">' + vg.toLocaleString() + ' (' + pct.toFixed(1) + '%)</span></div>' +
+          '</div></div>';
+        layer.bindPopup(popupContent, { maxWidth:340, className:'' });
       }
     }).eachLayer(function(l) { cluster.addLayer(l); });
     return cluster;
