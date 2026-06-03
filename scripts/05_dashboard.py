@@ -831,13 +831,22 @@ function initChart(id) {{
 // Chart 8: Box-style distribution of deltas per pair
 (function() {{
   var chart = initChart('chart-comp-box');
+  function calcBox(vals) {{
+    var sorted = vals.slice().sort(function(a,b) {{ return a-b; }});
+    var n = sorted.length;
+    var min = sorted[0], max = sorted[n-1];
+    var q1 = sorted[Math.round(n*0.25)];
+    var med = sorted[Math.round(n*0.5)];
+    var q3 = sorted[Math.round(n*0.75)];
+    return [min, q1, med, q3, max];
+  }}
   var series = compPairs.map(function(p) {{
     var prefix = p + '_';
-    var vals = fullComp.map(function(r) {{ return r[prefix + 'delta'] || 0; }}).sort(function(a,b) {{ return a-b; }});
+    var vals = fullComp.map(function(r) {{ return r[prefix + 'delta'] || 0; }});
     return {{
       name: p.split(' vs ').join(' '),
       type: 'boxplot',
-      data: [vals],
+      data: [calcBox(vals)],
       itemStyle: {{ color: '{P['primary']}' }},
     }};
   }});
@@ -854,9 +863,9 @@ function initChart(id) {{
     }}
   }});
   chart.setOption({{
-    tooltip: {{ trigger:'axis', formatter: function(ps) {{
-      var d = ps[0].data;
-      return '<strong>' + ps[0].seriesName + '</strong><br>' +
+    tooltip: {{ trigger:'item', formatter: function(p) {{
+      var d = p.data;
+      return '<strong>' + p.seriesName + '</strong><br>' +
         '<span style="color:#757575">Valor minimo</span>: ' + d[1].toFixed(1) + ' pp<br>' +
         '<span style="color:#757575">25% percentil</span>: ' + d[2].toFixed(1) + ' pp<br>' +
         '<span style="color:#757575">Mediana</span>: <strong>' + d[3].toFixed(1) + '</strong> pp<br>' +
