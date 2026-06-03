@@ -224,6 +224,10 @@ body {{ padding-bottom:48px; }}
 /* Footer */
 .footer {{ text-align:center; padding:24px; color:{P['text-hint']}; font-size:12px; }}
 
+/* Tab sections */
+.section {{ display:none; }}
+.section.active {{ display:block; }}
+
 /* Sticky nav */
 .section-nav-wrap {{ position:sticky; top:0; z-index:100; margin-bottom:24px; }}
 </style>
@@ -244,11 +248,11 @@ body {{ padding-bottom:48px; }}
 
 <div class="section-nav-wrap">
   <nav class="section-nav" id="section-nav">
-    <a href="#resumen" class="active">Resumen</a>
-    <a href="#mapa">Mapa</a>
-    <a href="#graficos">Graficos</a>
-    <a href="#detalle">Detalle UPZ</a>
-    <a href="#comparativo">Comparativo 22-26</a>
+    <a href="#" data-section="resumen" class="active">Resumen</a>
+    <a href="#" data-section="mapa">Mapa</a>
+    <a href="#" data-section="graficos">Graficos</a>
+    <a href="#" data-section="detalle">Detalle UPZ</a>
+    <a href="#" data-section="comparativo">Comparativo 22-26</a>
   </nav>
 </div>
 
@@ -298,7 +302,7 @@ body {{ padding-bottom:48px; }}
     <span class="badge badge-primary">5 modos + multi-select + toggle UPZ/Localidad</span>
   </div>
   <div class="full-card" style="padding:0;overflow:hidden">
-    <iframe class="map-frame" src="mapa_bogota.html" title="Mapa electoral interactivo"></iframe>
+    <iframe class="map-frame" data-src="mapa_bogota.html" title="Mapa electoral interactivo"></iframe>
   </div>
 </section>
 
@@ -638,6 +642,7 @@ function initChart(id) {{
   var dom = document.getElementById(id);
   if (!dom) return {{ setOption:function(){{}}, resize:function(){{}} }};
   var chart = echarts.init(dom, 'colombia', {{ renderer: 'canvas' }});
+  allCharts.push(chart);
   return chart;
 }}
 
@@ -883,25 +888,34 @@ function initChart(id) {{
   window.addEventListener('resize', function() {{ chart.resize(); }});
 }})();
 
-// ─── SECTION NAV ───
-(function() {{
-  var links = document.querySelectorAll('.section-nav a');
-  var sections = [];
-  links.forEach(function(a) {{
-    var id = a.getAttribute('href').slice(1);
-    sections.push(document.getElementById(id));
-  }});
-  var observer = new IntersectionObserver(function(entries) {{
-    entries.forEach(function(entry) {{
-      if (entry.isIntersecting) {{
-        links.forEach(function(l) {{ l.classList.remove('active'); }});
-        var link = document.querySelector('.section-nav a[href="#' + entry.target.id + '"]');
-        if (link) link.classList.add('active');
-      }}
-    }});
-  }}, {{ rootMargin:'-100px 0px -60% 0px' }});
-  sections.forEach(function(s) {{ if (s) observer.observe(s); }});
-}})();
+// ─── SPA TAB NAV ───
+var allCharts = [];
+var loadedIframes = {{}};
+function switchSection(id) {{
+  document.querySelectorAll('.section').forEach(function(s) {{ s.classList.remove('active'); }});
+  var section = document.getElementById(id);
+  if (section) section.classList.add('active');
+  document.querySelectorAll('.section-nav a').forEach(function(a) {{ a.classList.remove('active'); }});
+  var link = document.querySelector('.section-nav a[data-section="' + id + '"]');
+  if (link) link.classList.add('active');
+  // Lazy-load iframe if needed (Leaflet needs visible container)
+  var iframe = section && section.querySelector('iframe[data-src]');
+  if (iframe && !loadedIframes[id]) {{
+    iframe.src = iframe.getAttribute('data-src');
+    loadedIframes[id] = true;
+  }}
+  // Resize charts
+  setTimeout(function() {{
+    allCharts.forEach(function(c) {{ if (c && c.resize) try {{ c.resize(); }} catch(e) {{ }} }});
+  }}, 50);
+}}
+document.getElementById('section-nav').addEventListener('click', function(e) {{
+  var a = e.target.closest('.section-nav a');
+  if (a) {{ e.preventDefault(); switchSection(a.getAttribute('data-section')); }}
+}});
+// Show initial section based on hash
+var initialSection = window.location.hash.replace('#', '') || 'resumen';
+switchSection(initialSection);
 </script>
 </body>
 </html>"""
