@@ -68,6 +68,8 @@ for upz in votos['UPLCODIGO'].unique():
 resumen.sort(key=lambda x: x['total'], reverse=True)
 table_json = json.dumps(resumen, ensure_ascii=False)
 
+localidades = sorted(set(r['loc'] for r in resumen))
+
 # Stats por candidato
 stats_cand = []
 for c in cand_order:
@@ -165,7 +167,11 @@ html = f"""<!DOCTYPE html>
 <div class="section">
   <div class="section-title">Resumen completo por UPZ</div>
   <div class="table-controls">
-    <input type="text" id="search-input" placeholder="Buscar UPZ o localidad..." onkeyup="filterTable()">
+    <input type="text" id="search-input" placeholder="Buscar UPZ..." onkeyup="filterTable()">
+    <select id="loc-filter" onchange="filterTable()">
+      <option value="">Todas las localidades</option>
+      {"".join(f'<option value="{l}">{l}</option>' for l in localidades)}
+    </select>
     <select id="cat-filter" onchange="filterTable()">
       <option value="">Todas las categorías</option>
       <option value="Seguro">Seguro</option>
@@ -228,11 +234,13 @@ function renderTable(data) {{
 
 function filterTable() {{
   var q = document.getElementById('search-input').value.toLowerCase();
+  var loc = document.getElementById('loc-filter').value;
   var cat = document.getElementById('cat-filter').value;
   var filtered = tableData.filter(function(r) {{
-    var matchName = r.nom.toLowerCase().indexOf(q) >= 0 || r.cod.toLowerCase().indexOf(q) >= 0 || r.loc.toLowerCase().indexOf(q) >= 0;
+    var matchName = r.nom.toLowerCase().indexOf(q) >= 0 || r.cod.toLowerCase().indexOf(q) >= 0;
+    var matchLoc = !loc || r.loc === loc;
     var matchCat = !cat || r.cat === cat;
-    return matchName && matchCat;
+    return matchName && matchLoc && matchCat;
   }});
   renderTable(filtered);
 }}

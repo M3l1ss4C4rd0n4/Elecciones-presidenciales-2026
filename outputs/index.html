@@ -85,7 +85,11 @@
 <div class="section">
   <div class="section-title">Resumen completo por UPZ</div>
   <div class="table-controls">
-    <input type="text" id="search-input" placeholder="Buscar UPZ o localidad..." onkeyup="filterTable()">
+    <input type="text" id="search-input" placeholder="Buscar UPZ..." onkeyup="filterTable()">
+    <select id="loc-filter" onchange="filterTable()">
+      <option value="">Todas las localidades</option>
+      <option value="ANTONIO NARIÑO">ANTONIO NARIÑO</option><option value="BARRIOS UNIDOS">BARRIOS UNIDOS</option><option value="BOSA">BOSA</option><option value="CANDELARIA">CANDELARIA</option><option value="CHAPINERO">CHAPINERO</option><option value="CIUDAD BOLIVAR">CIUDAD BOLIVAR</option><option value="ENGATIVA">ENGATIVA</option><option value="FONTIBON">FONTIBON</option><option value="KENNEDY">KENNEDY</option><option value="LOS MARTIRES">LOS MARTIRES</option><option value="PUENTE ARANDA">PUENTE ARANDA</option><option value="RAFAEL URIBE URIBE">RAFAEL URIBE URIBE</option><option value="SAN CRISTOBAL">SAN CRISTOBAL</option><option value="SANTA FE">SANTA FE</option><option value="SUBA">SUBA</option><option value="SUMAPAZ">SUMAPAZ</option><option value="TEUSAQUILLO">TEUSAQUILLO</option><option value="TUNJUELITO">TUNJUELITO</option><option value="USAQUEN">USAQUEN</option><option value="USME">USME</option>
+    </select>
     <select id="cat-filter" onchange="filterTable()">
       <option value="">Todas las categorías</option>
       <option value="Seguro">Seguro</option>
@@ -148,11 +152,13 @@ function renderTable(data) {
 
 function filterTable() {
   var q = document.getElementById('search-input').value.toLowerCase();
+  var loc = document.getElementById('loc-filter').value;
   var cat = document.getElementById('cat-filter').value;
   var filtered = tableData.filter(function(r) {
-    var matchName = r.nom.toLowerCase().indexOf(q) >= 0 || r.cod.toLowerCase().indexOf(q) >= 0 || r.loc.toLowerCase().indexOf(q) >= 0;
+    var matchName = r.nom.toLowerCase().indexOf(q) >= 0 || r.cod.toLowerCase().indexOf(q) >= 0;
+    var matchLoc = !loc || r.loc === loc;
     var matchCat = !cat || r.cat === cat;
-    return matchName && matchCat;
+    return matchName && matchLoc && matchCat;
   });
   renderTable(filtered);
 }
